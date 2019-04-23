@@ -20,7 +20,8 @@
  * Enter the `pull-secret` value downloaded above.
   
 2. Rename and move the `install-config.yaml` file to `$OCP4_AWS_WORKSPACE/vault/<cluster-name>-install-config.yaml`
-3. The install config file contains all the information you provided in the previous steps including the cluster name, pull-secret and others so [keep it secret, keep it safe](https://www.youtube.com/watch?v=iThtELZvfPs) as a credentials file.
+
+⚠️ The install config file contains all the information you provided in the previous steps including the cluster name, pull-secret and others so [keep it secret, keep it safe](https://www.youtube.com/watch?v=iThtELZvfPs) as a credentials file.
 
 ## How to create a new OCP4 cluster on AWS
 
