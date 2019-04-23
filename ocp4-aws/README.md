@@ -34,15 +34,15 @@ Use the `create-ocp4-cluster` script to create a new cluster of a given name (`<
 
 If the file exists, the script creates a new cluster directory `$OCP4_AWS_WORKSPACE/cluster/<cluster-name>` and copies the above install config file to `$OCP4_AWS_WORKSPACE/cluster/<cluster-name>/install-config.yaml` so that the `openshift-install` tool can pick it up and use it to create the new cluster.
 
-If the file does not exist, the script triggers an ordinary cluster-ceating wizard of the `openshift-install` tool specifying the cluster directory by `--dir` parameter by executing the following CLI:
+If the file does not exist, the script triggers an ordinary cluster-creating wizard of the `openshift-install` tool specifying the cluster directory by `--dir` parameter by executing the following CLI:
 
 ```
 openshift-install create cluster --log-level debug --dir $OCP4_AWS_WORKSPACE/cluster/<cluster-name>
 ```
 
-## How to destroy a new OCP4 cluster on AWS
+## How to destroy OCP4 cluster on AWS
 
-Execute: 
+Execute:
 
 ```
 ./destroy-ocp4-cluster <cluster-name>
