@@ -1,0 +1,21 @@
+#!/bin/bash
+source ~/.zshrc &> /dev/null;
+
+export OCP4_AWS_WORKSPACE="${OCP4_AWS_WORKSPACE:-$(readlink -f .)}"
+
+CLUSTER_NAME="${1:-}"
+if [ "$CLUSTER_NAME" != "" ]; then
+	CLUSTER_DIR="$OCP4_AWS_WORKSPACE/cluster/$CLUSTER_NAME"
+	CLUSTER_CONFIG="$OCP4_AWS_WORKSPACE/vault/$CLUSTER_NAME-install-config.yaml"
+	if [ -f "$CLUSTER_CONFIG" ]; then
+		echo "Using cluster config: $CLUSTER_CONFIG"
+		mkdir -p "$CLUSTER_DIR"
+		cp -rvf "$CLUSTER_CONFIG" "$CLUSTER_DIR/install-config.yaml"
+	fi
+	set -x
+	openshift-install create cluster --log-level debug --dir "$CLUSTER_DIR"
+	set +x;
+else
+	echo "Usage: $0 <cluster-name>"
+fi
+

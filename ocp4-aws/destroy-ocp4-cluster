@@ -1,0 +1,15 @@
+#!/bin/bash
+source ~/.zshrc &> /dev/null;
+
+export OCP4_AWS_WORKSPACE="${OCP4_AWS_WORKSPACE:-$(readlink -f .)}"
+
+CLUSTER_NAME="${1:-}"
+if [ "$CLUSTER_NAME" != "" ]; then
+	CLUSTER_DIR="$OCP4_AWS_WORKSPACE/cluster/$CLUSTER_NAME"
+	set -x
+	openshift-install destroy cluster --log-level debug --dir "$CLUSTER_DIR"
+	set +x;
+	echo "You can now delete the cluster directory: $CLUSTER_DIR"
+else
+	echo "Usage: $0 <cluster-name>"
+fi
