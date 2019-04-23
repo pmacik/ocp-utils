@@ -1,6 +1,4 @@
 #!/bin/bash
-source ~/.zshrc &> /dev/null;
-
 export OCP4_AWS_WORKSPACE="${OCP4_AWS_WORKSPACE:-$(readlink -f .)}"
 
 CLUSTER_NAME="${1:-}"
