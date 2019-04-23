@@ -5,6 +5,7 @@
 1. Follow the steps 1-3 in of the [instuctions](https://cloud.openshift.com/clusters/install) to prepare AWS.
 2. Get a `pull-secret` from step 4 of the instuctions.
 3. Get an `openshift-install` from step 5 of the instuctions.
+4. Choose the workspace directory to where the cluster meta-data directories and this utilities will live and set the `OCP4_AWS_WORKSPACE` env variable accordingly (current direcory `.` is the default value).
 
 ## Prepare install config
 1. Generate an `install-config.yaml` using the installer:
