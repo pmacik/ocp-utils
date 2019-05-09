@@ -1,5 +1,5 @@
 #!/bin/bash
-export OCP4_AWS_WORKSPACE="${OCP4_AWS_WORKSPACE:-$(readlink -f .)}"
+source ./setenv
 
 CLUSTER_NAME="${1:-}"
 if [ "$CLUSTER_NAME" != "" ]; then
