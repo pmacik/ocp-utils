@@ -1,5 +1,5 @@
 #!/bin/bash
-source ./setenv
+source "$(dirname $(readlink -f $(which $0)))/.setenv"
 
 CLUSTER_NAME="${1:-}"
 if [ "$CLUSTER_NAME" != "" ]; then
