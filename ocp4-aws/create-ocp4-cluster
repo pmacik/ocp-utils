@@ -11,7 +11,7 @@ if [ "$CLUSTER_NAME" != "" ]; then
 		cp -rvf "$CLUSTER_CONFIG" "$CLUSTER_DIR/install-config.yaml"
 	fi
 	set -x
-	openshift-install create cluster --log-level debug --dir "$CLUSTER_DIR"
+	${OI_BINARY} create cluster --log-level debug --dir "$CLUSTER_DIR"
 	set +x;
 else
 	echo "Usage: $0 <cluster-name>"

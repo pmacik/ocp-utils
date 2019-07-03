@@ -1,7 +1,15 @@
 #!/bin/bash
 export OCP4_AWS_WORKSPACE="${OCP4_AWS_WORKSPACE:-$(readlink -f .)}"
 
-OI_LOCAL_VERSION="$(openshift-install version | grep quay.io | sed -e 's,.*\(sha256:.*\),\1,')"
+export OI_BINARY=${OI_BINARY:-$(which openshift-install)}
+
+OI_VERSION=$(${OI_BINARY} version)
+if [ $? -gt 0 ]; then
+    echo "ERROR openshift-install not found on PATH or the one set by OI_BINARY environment variable not found."
+    exit 1
+fi
+
+OI_LOCAL_VERSION="$(echo ${OI_VERSION} | grep quay.io | sed -e 's,.*\(sha256:.*\),\1,')"
 OI_LATEST_VERSION="$(curl -s -L https://mirror.openshift.com/pub/openshift-v4/clients/ocp/latest/release.txt | grep "Digest: " | sed -e 's,.*\(sha256:.*\),\1,')"
 
 if [ "$OI_LOCAL_VERSION" != "$OI_LATEST_VERSION" ]; then
