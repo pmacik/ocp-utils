@@ -27,7 +27,7 @@
 
 Execute:
 
-```
+```shell
 ./create-ocp4-cluster <cluster-name>
 ```
 
@@ -37,7 +37,7 @@ If the file exists, the script creates a new cluster directory `$OCP4_AWS_WORKSP
 
 If the file does not exist, the script triggers an ordinary cluster-creating wizard of the `openshift-install` tool specifying the cluster directory by `--dir` parameter by executing the following CLI:
 
-```
+```shell
 openshift-install create cluster --log-level debug --dir $OCP4_AWS_WORKSPACE/cluster/<cluster-name>
 ```
 
@@ -45,6 +45,16 @@ openshift-install create cluster --log-level debug --dir $OCP4_AWS_WORKSPACE/clu
 
 Execute:
 
-```
+```shell
 ./destroy-ocp4-cluster <cluster-name>
 ```
+
+## How to switch to an OCP4 cluster
+
+Execute:
+
+```shell
+./use-ocp4-cluster <cluster-name>
+```
+
+Use the `use-ocp4-cluster` to use the given cluster as the current one. The script looks for the `$OCP4_AWS_WORKSPACE/cluster/<cluster-name>` directory and if it exists the script creates/updates a convenient symbolic link `$OCP4_AWS_WORKSPACE/current` pointing at `$OCP4_AWS_WORKSPACE/cluster/<cluster-name>`.
