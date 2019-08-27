@@ -1,0 +1,203 @@
+#!/bin/bash
+
+N_ARG="--new-cluster"
+U_ARG="--use-cluster"
+D_ARG="--destroy-cluster"
+C_ARG="--clean-local-files"
+
+CLI="ocp4-aws"
+
+usage() {
+    echo "Usage: $CLI ( -n | -u | -d | -c ) <cluster-name>"
+    echo ""
+    echo "  -n  $N_ARG    Create a new OCP4 cluster named <cluster-name>"
+    echo "  -u  $U_ARG    Switch to the OCP4 cluster named <cluster-name>"
+    echo "  -d  $D_ARG    Destroy the OCP4 cluster named <cluster-name>"
+    echo "  -c  $C_ARG    Delete local cluster directory (\$OCP_AWS_WORKSPACE/cluster/<cluster-name>)"
+    echo ""
+}
+
+set_env() {
+    export OCP4_AWS_WORKSPACE="${OCP4_AWS_WORKSPACE:-$(readlink -f .)}"
+
+    USE_OI=${USE_OI:-}
+
+    if [ ! -z $USE_OI ] && [ ! -z $1 ]; then
+
+        export OI_BINARY=${OI_BINARY:-$(which openshift-install)}
+
+        OI_VERSION=$(${OI_BINARY} version)
+        if [ $? -gt 0 ]; then
+            echo "ERROR openshift-install not found on PATH or the one set by OI_BINARY environment variable not found."
+            exit 1
+        fi
+
+        OI_LOCAL_VERSION="$(echo ${OI_VERSION} | grep quay.io | sed -e 's,.*\(sha256:.*\),\1,')"
+        OI_LATEST_VERSION="$(curl -s -L https://mirror.openshift.com/pub/openshift-v4/clients/ocp/latest/release.txt | grep "Digest: " | sed -e 's,.*\(sha256:.*\),\1,')"
+
+        if [ "$OI_LOCAL_VERSION" != "$OI_LATEST_VERSION" ]; then
+            echo ""
+            echo "  WARNING: Your local version of openshift-install tool is different from the latest one."
+            echo "           Please update your local version to make sure the OCP4 cluster creating/destroying works properly."
+            echo "           The latest version can be found here: https://mirror.openshift.com/pub/openshift-v4/clients/ocp/latest/"
+            echo ""
+            echo "           Resuming after 15s..."
+            echo ""
+            sleep 15s
+        fi
+    fi
+}
+
+_new_cluster_usage() {
+    echo ""
+    echo "Usage: $CLI [ -n | $N_ARG ] <cluster-name>"
+    echo ""
+    echo "  Create a new cluster of a given name (<cluster-name>)."
+    echo ""
+    echo "  Looks for '\$OCP4_AWS_WORKSPACE/vault/<clustername>-install-config.yaml' file."
+    echo ""
+    echo "  If the file exists, a new cluster directory '\$OCP4_AWS_WORKSPACE/cluster/<cluster-name>'"
+    echo "  is created and the above install config file is copied"
+    echo "  to '\$OCP4_AWS_WORKSPACE/cluster/<cluster-name>/install-config.yaml' so that"
+    echo "  the 'openshift-install' tool can pick it up and use it to create the new cluster."
+    echo ""
+    echo "  If the file does not exist, the script triggers an ordinary cluster-creating wizard"
+    echo "  of the 'openshift-install' tool specifying the cluster directory by '--dir' parameter"
+    echo "  by executing the following CLI:"
+    echo ""
+    echo "      openshift-install create cluster --log-level debug --dir \$OCP4_AWS_WORKSPACE/cluster/<cluster-name>"
+    echo ""
+}
+
+new_cluster() {
+    USE_OI=true set_env $2
+
+    CLUSTER_NAME="${1:-}"
+    if [ "$CLUSTER_NAME" != "" ]; then
+        CLUSTER_DIR="$OCP4_AWS_WORKSPACE/cluster/$CLUSTER_NAME"
+        CLUSTER_CONFIG="$OCP4_AWS_WORKSPACE/vault/$CLUSTER_NAME-install-config.yaml"
+        if [ -f "$CLUSTER_CONFIG" ]; then
+            echo "Using cluster config: $CLUSTER_CONFIG"
+            mkdir -p "$CLUSTER_DIR"
+            cp -rvf "$CLUSTER_CONFIG" "$CLUSTER_DIR/install-config.yaml"
+        fi
+        set -x
+        ${OI_BINARY} create cluster --log-level debug --dir "$CLUSTER_DIR"
+        set +x;
+    else
+        _new_cluster_usage
+    fi
+}
+
+_destroy_cluster_usage() {
+    echo ""
+    echo "Usage: $CLI [ -d | $D_ARG ] <cluster-name>"
+    echo ""
+    echo "  Destroy the cluster with a given name."
+    echo ""
+    echo "  Looks for the cluster directory \$OCP4_AWS_WORKSPACE/cluster/<cluster-name>'"
+    echo "  and if it exists, attempts to destroy the cluster via 'openshift_install' tool."
+    echo ""
+}
+
+destroy_cluster() {
+    USE_OI=true set_env $2
+
+    CLUSTER_NAME="${1:-}"
+    if [ "$CLUSTER_NAME" != "" ]; then
+        CLUSTER_DIR="$OCP4_AWS_WORKSPACE/cluster/$CLUSTER_NAME"
+        set -x
+        ${OI_BINARY} destroy cluster --log-level debug --dir "$CLUSTER_DIR"
+        set +x;
+        echo "You can now delete the cluster directory ($CLUSTER_DIR): $CLI -d $CLUSTER_NAME"
+    else
+        _destroy_cluster_usage
+    fi
+}
+
+_use_cluster_usage() {
+    echo ""
+    echo "Usage: $CLI [ -u | $U_ARG ] <cluster-name>"
+    echo ""
+    echo "  Uses the given cluster as the current one."
+    echo ""
+    echo "  Looks for the '\$OCP4_AWS_WORKSPACE/cluster/<cluster-name>' directory"
+    echo "  and if it exists a convenient symbolic link '\$OCP4_AWS_WORKSPACE/current'"
+    echo "  is created/updated pointing at '\$OCP4_AWS_WORKSPACE/cluster/<cluster-name>'."
+    echo ""
+}
+
+use_cluster() {
+    set_env $2
+
+    CLUSTER_NAME="${1:-}"
+    if [ "$CLUSTER_NAME" != "" ]; then
+        CLUSTER_DIR="$OCP4_AWS_WORKSPACE/cluster/$CLUSTER_NAME"
+        if [ -d $CLUSTER_DIR ]; then
+            echo "Using cluster: $CLUSTER_NAME"
+            rm -rf $OCP4_AWS_WORKSPACE/current
+            ln -s $CLUSTER_DIR $OCP4_AWS_WORKSPACE/current
+        else
+            echo "ERROR: Cluster directory $CLUSTER_NAME not found ($CLUSTER_DIR)."
+        fi
+    else
+        _use_cluster_usage
+    fi
+}
+
+_clean_local_files_usage() {
+    echo ""
+    echo "Usage: $CLI [ -c | $C_ARG ] <cluster-name>"
+    echo ""
+    echo "  Cleans (deletes) the local directory for the given cluster."
+    echo ""
+    echo "  Looks for the '\$OCP4_AWS_WORKSPACE/cluster/<cluster-name>' directory"
+    echo "  and if it exists it's deleted."
+    echo ""
+}
+
+clean_local_files() {
+    set_env
+
+    CLUSTER_NAME="${1:-}"
+    if [ "$CLUSTER_NAME" != "" ]; then
+        CLUSTER_DIR="$OCP4_AWS_WORKSPACE/cluster/$CLUSTER_NAME"
+        if [ -d $CLUSTER_DIR ]; then
+            echo "Deleting local cluster directory ($CLUSTER_DIR)"
+            rm -rvf $CLUSTER_DIR
+        else
+            echo "ERROR: Cluster directory $CLUSTER_NAME not found ($CLUSTER_DIR)."
+        fi
+    else
+        _clean_local_files_usage
+    fi
+}
+
+case $2 in
+    -h | --help )   case $1 in
+                        -n | $N_ARG )       _new_cluster_usage
+                                            ;;
+                        -u | $U_ARG )       _use_cluster_usage
+                                            ;;
+                        -d | $D_ARG )       _destroy_cluster_usage
+                                            ;;
+                        -c | $C_ARG )       _clean_local_files_usage
+                                            ;;
+                    esac
+                    ;;
+    * )             case $1 in
+                        -n | $N_ARG )       new_cluster $2
+                                            ;;
+                        -u | $U_ARG )       use_cluster $2
+                                            ;;
+                        -d | $D_ARG )       destroy_cluster $2
+                                            ;;
+                        -c | $C_ARG )       clean_local_files $2
+                                            ;;
+                        -h | --help )       usage
+                                            exit
+                                            ;;
+                        * )                 usage
+                                            exit 1
+                    esac
+esac

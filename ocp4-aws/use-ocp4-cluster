@@ -1,16 +1,5 @@
 #!/bin/bash
-source "$(dirname $(readlink -f $(which $0)))/.setenv"
-
-CLUSTER_NAME="${1:-}"
-if [ "$CLUSTER_NAME" != "" ]; then
-	CLUSTER_DIR="$OCP4_AWS_WORKSPACE/cluster/$CLUSTER_NAME"
-	if [ -d $CLUSTER_DIR ]; then
-		echo "Using cluster: $CLUSTER_NAME"
-		rm -rf $OCP4_AWS_WORKSPACE/current
-		ln -s $CLUSTER_DIR $OCP4_AWS_WORKSPACE/current
-	else
-		echo "ERROR: Cluster directory $CLUSTER_NAME not found ($CLUSTER_DIR)."
-	fi
-else
-	echo "Usage: $0 <cluster-name>"
-fi
+echo ""
+echo "!!! This script is obsolete and will be deleted soon, use 'ocp4-aws -u' instead."
+echo ""
+exit 1

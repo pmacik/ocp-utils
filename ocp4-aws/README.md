@@ -1,4 +1,4 @@
-# Utilities for creating and destroying OCP 4 clusters on AWS
+# Utility for creating and destroying OCP 4 clusters on AWS
 
 ## Pre-requisities
 
@@ -8,8 +8,10 @@
 4. Choose the workspace directory to where the cluster meta-data directories and this utilities will live and set the `OCP4_AWS_WORKSPACE` env variable accordingly (current direcory `.` is the default value).
 
 ## Prepare install config
+
 1. Generate an `install-config.yaml` using the installer:
- * ```
+
+ * ```shell
    openshift-install create install-config
    ```
  * Select an `SSH Public Key`.
@@ -28,10 +30,10 @@
 Execute:
 
 ```shell
-./create-ocp4-cluster <cluster-name>
+ocp-aws -n <cluster-name>
 ```
 
-Use the `create-ocp4-cluster` script to create a new cluster of a given name (`<cluster-name>`). The script will take a look for `$OCP4_AWS_WORKSPACE/vault/<clustername>-install-config.yaml` file.
+Use the `--new-cluster` (or `-n`) parameter to create a new cluster of a given name (`<cluster-name>`). The script will take a look for `$OCP4_AWS_WORKSPACE/vault/<clustername>-install-config.yaml` file.
 
 If the file exists, the script creates a new cluster directory `$OCP4_AWS_WORKSPACE/cluster/<cluster-name>` and copies the above install config file to `$OCP4_AWS_WORKSPACE/cluster/<cluster-name>/install-config.yaml` so that the `openshift-install` tool can pick it up and use it to create the new cluster.
 
@@ -41,20 +43,32 @@ If the file does not exist, the script triggers an ordinary cluster-creating wiz
 openshift-install create cluster --log-level debug --dir $OCP4_AWS_WORKSPACE/cluster/<cluster-name>
 ```
 
-## How to destroy OCP4 cluster on AWS
-
-Execute:
-
-```shell
-./destroy-ocp4-cluster <cluster-name>
-```
-
 ## How to switch to an OCP4 cluster
 
 Execute:
 
 ```shell
-./use-ocp4-cluster <cluster-name>
+ocp4-aws -u <cluster-name>
 ```
 
-Use the `use-ocp4-cluster` to use the given cluster as the current one. The script looks for the `$OCP4_AWS_WORKSPACE/cluster/<cluster-name>` directory and if it exists the script creates/updates a convenient symbolic link `$OCP4_AWS_WORKSPACE/current` pointing at `$OCP4_AWS_WORKSPACE/cluster/<cluster-name>`.
+Use the `--use-cluster` (or `-u`) parameter to use the given cluster as the current one. The script looks for the `$OCP4_AWS_WORKSPACE/cluster/<cluster-name>` directory and if it exists the script creates/updates a convenient symbolic link `$OCP4_AWS_WORKSPACE/current` pointing at `$OCP4_AWS_WORKSPACE/cluster/<cluster-name>`.
+
+## How to destroy OCP4 cluster on AWS
+
+Execute:
+
+```shell
+ocp4-aws -d <cluster-name>
+```
+
+Use the `--destroy-cluster` (or `-d`) parameter to destroy the given cluster (`<cluster-name>`).
+
+## How to clean local files
+
+Execute:
+
+```shell
+ocp4-aws -c <cluster-name>
+```
+
+Use the `--clean-local-files` (or `-c`) parameter to clean (delete) the local directory for the given cluster (`<cluster-name>`).
