@@ -2,4 +2,5 @@
 echo ""
 echo "!!! This script is obsolete and will be deleted soon, use 'ocp4-aws -d' instead."
 echo ""
-exit 1
+
+./ocp4-aws -d $@
