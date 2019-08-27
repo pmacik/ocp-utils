@@ -20,9 +20,10 @@ usage() {
 set_env() {
     export OCP4_AWS_WORKSPACE="${OCP4_AWS_WORKSPACE:-$(readlink -f .)}"
 
-    USE_OI=${USE_OI:-}
+    USE_OI=${1:-false}
+    echo $2
 
-    if [ ! -z $USE_OI ] && [ ! -z $1 ]; then
+    if [ $USE_OI == "true" ] && [ "$2" == "" ]; then
 
         export OI_BINARY=${OI_BINARY:-$(which openshift-install)}
 
@@ -70,7 +71,7 @@ _new_cluster_usage() {
 }
 
 new_cluster() {
-    USE_OI=true set_env $2
+    set_env true $2
 
     CLUSTER_NAME="${1:-}"
     if [ "$CLUSTER_NAME" != "" ]; then
@@ -101,7 +102,7 @@ _destroy_cluster_usage() {
 }
 
 destroy_cluster() {
-    USE_OI=true set_env $2
+    set_env true "$2"
 
     CLUSTER_NAME="${1:-}"
     if [ "$CLUSTER_NAME" != "" ]; then
@@ -128,7 +129,7 @@ _use_cluster_usage() {
 }
 
 use_cluster() {
-    set_env $2
+    set_env false $2
 
     CLUSTER_NAME="${1:-}"
     if [ "$CLUSTER_NAME" != "" ]; then
@@ -157,7 +158,7 @@ _clean_local_files_usage() {
 }
 
 clean_local_files() {
-    set_env
+    set_env false $2
 
     CLUSTER_NAME="${1:-}"
     if [ "$CLUSTER_NAME" != "" ]; then
