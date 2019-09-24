@@ -21,7 +21,6 @@ set_env() {
     export OCP4_AWS_WORKSPACE="${OCP4_AWS_WORKSPACE:-$(readlink -f .)}"
 
     USE_OI=${1:-false}
-    echo $2
 
     if [ $USE_OI == "true" ] && [ "$2" == "" ]; then
 
@@ -110,7 +109,7 @@ destroy_cluster() {
         set -x
         ${OI_BINARY} destroy cluster --log-level debug --dir "$CLUSTER_DIR"
         set +x;
-        echo "You can now delete the cluster directory ($CLUSTER_DIR): $CLI -d $CLUSTER_NAME"
+        echo "You can now delete the cluster directory ($CLUSTER_DIR): $CLI -c $CLUSTER_NAME"
     else
         _destroy_cluster_usage
     fi
