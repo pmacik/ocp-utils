@@ -15,10 +15,14 @@ usage() {
     echo "  -d  $D_ARG    Destroy the OCP4 cluster named <cluster-name>"
     echo "  -c  $C_ARG    Delete local cluster directory (\$OCP_AWS_WORKSPACE/cluster/<cluster-name>)"
     echo ""
+    echo "Note: When OCP4_AWS_CLUSTER_NAME_SUFFIX environment variable is set the cluster name used would be <cluster-name>-<suffix>."
 }
 
 set_env() {
     export OCP4_AWS_WORKSPACE="${OCP4_AWS_WORKSPACE:-$(readlink -f .)}"
+    if [ -z "$OPENSHIFT_INSTALL_RELEASE_IMAGE_OVERRIDE" ]; then
+        export OPENSHIFT_INSTALL_RELEASE_IMAGE_OVERRIDE
+    fi
 
     USE_OI=${1:-false}
 
@@ -67,6 +71,8 @@ _new_cluster_usage() {
     echo ""
     echo "      openshift-install create cluster --log-level debug --dir \$OCP4_AWS_WORKSPACE/cluster/<cluster-name>"
     echo ""
+    echo "Note: When OCP4_AWS_CLUSTER_NAME_SUFFIX environment variable is set the cluster config is first cloned (if necessary)"
+    echo "while the cluster name is modified by adding the suffix to be <cluster-name>-<suffix>."
 }
 
 new_cluster() {
@@ -77,6 +83,13 @@ new_cluster() {
         CLUSTER_DIR="$OCP4_AWS_WORKSPACE/cluster/$CLUSTER_NAME"
         CLUSTER_CONFIG="$OCP4_AWS_WORKSPACE/vault/$CLUSTER_NAME-install-config.yaml"
         if [ -f "$CLUSTER_CONFIG" ]; then
+            if [ ! -z $OCP4_AWS_CLUSTER_NAME_SUFFIX ]; then
+                OCP4_AWS_CLUSTER_NAME_SUFFIXED="$CLUSTER_NAME-$OCP4_AWS_CLUSTER_NAME_SUFFIX"
+                CLUSTER_CONFIG_SUFFIXED="$OCP4_AWS_WORKSPACE/vault/$OCP4_AWS_CLUSTER_NAME_SUFFIXED-install-config.yaml"
+                sed -e "s,name: $CLUSTER_NAME,name: $OCP4_AWS_CLUSTER_NAME_SUFFIXED,g" "$CLUSTER_CONFIG" > "$CLUSTER_CONFIG_SUFFIXED"
+                CLUSTER_DIR="$CLUSTER_DIR-$OCP4_AWS_CLUSTER_NAME_SUFFIX"
+                CLUSTER_CONFIG=$CLUSTER_CONFIG_SUFFIXED
+            fi
             echo "Using cluster config: $CLUSTER_CONFIG"
             mkdir -p "$CLUSTER_DIR"
             cp -rvf "$CLUSTER_CONFIG" "$CLUSTER_DIR/install-config.yaml"
@@ -98,12 +111,16 @@ _destroy_cluster_usage() {
     echo "  Looks for the cluster directory \$OCP4_AWS_WORKSPACE/cluster/<cluster-name>'"
     echo "  and if it exists, attempts to destroy the cluster via 'openshift_install' tool."
     echo ""
+    echo "Note: When OCP4_AWS_CLUSTER_NAME_SUFFIX environment variable is set the cluster name used would be <cluster-name>-<suffix>."
 }
 
 destroy_cluster() {
     set_env true "$2"
 
     CLUSTER_NAME="${1:-}"
+    if [ ! -z $OCP4_AWS_CLUSTER_NAME_SUFFIX ]; then
+        CLUSTER_NAME="$CLUSTER_NAME-$OCP4_AWS_CLUSTER_NAME_SUFFIX"
+    fi
     if [ "$CLUSTER_NAME" != "" ]; then
         CLUSTER_DIR="$OCP4_AWS_WORKSPACE/cluster/$CLUSTER_NAME"
         set -x
@@ -125,12 +142,16 @@ _use_cluster_usage() {
     echo "  and if it exists a convenient symbolic link '\$OCP4_AWS_WORKSPACE/current'"
     echo "  is created/updated pointing at '\$OCP4_AWS_WORKSPACE/cluster/<cluster-name>'."
     echo ""
+    echo "Note: When OCP4_AWS_CLUSTER_NAME_SUFFIX environment variable is set the cluster name used would be <cluster-name>-<suffix>."
 }
 
 use_cluster() {
     set_env false $2
 
     CLUSTER_NAME="${1:-}"
+    if [ ! -z $OCP4_AWS_CLUSTER_NAME_SUFFIX ]; then
+        CLUSTER_NAME="$CLUSTER_NAME-$OCP4_AWS_CLUSTER_NAME_SUFFIX"
+    fi
     if [ "$CLUSTER_NAME" != "" ]; then
         CLUSTER_DIR="$OCP4_AWS_WORKSPACE/cluster/$CLUSTER_NAME"
         if [ -d $CLUSTER_DIR ]; then
@@ -154,12 +175,16 @@ _clean_local_files_usage() {
     echo "  Looks for the '\$OCP4_AWS_WORKSPACE/cluster/<cluster-name>' directory"
     echo "  and if it exists it's deleted."
     echo ""
+    echo "Note: When OCP4_AWS_CLUSTER_NAME_SUFFIX environment variable is set the cluster name used would be <cluster-name>-<suffix>."
 }
 
 clean_local_files() {
     set_env false $2
 
     CLUSTER_NAME="${1:-}"
+    if [ ! -z $OCP4_AWS_CLUSTER_NAME_SUFFIX ]; then
+        CLUSTER_NAME="$CLUSTER_NAME-$OCP4_AWS_CLUSTER_NAME_SUFFIX"
+    fi
     if [ "$CLUSTER_NAME" != "" ]; then
         CLUSTER_DIR="$OCP4_AWS_WORKSPACE/cluster/$CLUSTER_NAME"
         if [ -d $CLUSTER_DIR ]; then
