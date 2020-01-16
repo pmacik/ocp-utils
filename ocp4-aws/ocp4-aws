@@ -4,6 +4,7 @@ N_ARG="--new-cluster"
 U_ARG="--use-cluster"
 D_ARG="--destroy-cluster"
 C_ARG="--clean-local-files"
+I_ARG="--cluster-info"
 
 CLI="ocp4-aws"
 
@@ -14,6 +15,7 @@ usage() {
     echo "  -u  $U_ARG    Switch to the OCP4 cluster named <cluster-name>"
     echo "  -d  $D_ARG    Destroy the OCP4 cluster named <cluster-name>"
     echo "  -c  $C_ARG    Delete local cluster directory (\$OCP_AWS_WORKSPACE/cluster/<cluster-name>)"
+    echo "  -i  $I_ARG    Print cluster info from the local cluster directory (\$OCP_AWS_WORKSPACE/cluster/<cluster-name>)"
     echo ""
     echo "Note: When OCP4_AWS_CLUSTER_NAME_SUFFIX environment variable is set the cluster name used would be <cluster-name>-<suffix>."
 }
@@ -198,6 +200,50 @@ clean_local_files() {
     fi
 }
 
+_cluster_info_usage() {
+    echo ""
+    echo "Usage: $CLI [ -i | $I_ARG ] <cluster-name>"
+    echo ""
+    echo "  Prints cluster info from the local directory for the given cluster."
+    echo ""
+    echo "  Looks for the '\$OCP4_AWS_WORKSPACE/cluster/<cluster-name>' directory"
+    echo "  and if it exists the cluster connection info is extracted and printed."
+    echo ""
+    echo "Note: When OCP4_AWS_CLUSTER_NAME_SUFFIX environment variable is set the cluster name used would be <cluster-name>-<suffix>."
+}
+
+_cluster_domain() {
+    echo $(jq --raw-output '.cluster_domain' $1/terraform.tfvars.json)
+}
+
+_kubeadmin_pass() {
+    echo $(cat $1/auth/kubeadmin-password)
+}
+
+cluster_info() {
+    set_env false $2
+
+    CLUSTER_NAME="${1:-}"
+    if [ ! -z $OCP4_AWS_CLUSTER_NAME_SUFFIX ]; then
+        CLUSTER_NAME="$CLUSTER_NAME-$OCP4_AWS_CLUSTER_NAME_SUFFIX"
+    fi
+    if [ "$CLUSTER_NAME" != "" ]; then
+        CLUSTER_DIR="$OCP4_AWS_WORKSPACE/cluster/$CLUSTER_NAME"
+        if [ -d $CLUSTER_DIR ]; then
+            echo "console: https://console-openshift-console.apps.$(_cluster_domain $CLUSTER_DIR)"
+            echo "kubeadmin: $(_kubeadmin_pass $CLUSTER_DIR)"
+            #echo "kubeconfig:"
+            #echo ""
+            #echo "$(cat $CLUSTER_DIR/auth/kubeconfig)"
+            #echo ""
+        else
+            echo "ERROR: Cluster directory $CLUSTER_NAME not found ($CLUSTER_DIR)."
+        fi
+    else
+        _cluster_info_usage
+    fi
+}
+
 case $2 in
     -h | --help )   case $1 in
                         -n | $N_ARG )       _new_cluster_usage
@@ -207,6 +253,8 @@ case $2 in
                         -d | $D_ARG )       _destroy_cluster_usage
                                             ;;
                         -c | $C_ARG )       _clean_local_files_usage
+                                            ;;
+                        -i | $I_ARG )       _cluster_info_usage
                                             ;;
                     esac
                     ;;
@@ -218,6 +266,8 @@ case $2 in
                         -d | $D_ARG )       destroy_cluster $2
                                             ;;
                         -c | $C_ARG )       clean_local_files $2
+                                            ;;
+                        -i | $I_ARG )       cluster_info $2
                                             ;;
                         -h | --help )       usage
                                             exit
