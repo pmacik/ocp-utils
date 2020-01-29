@@ -49,7 +49,7 @@ GIST=$(curl -L -XPOST -d "{\"description\":\"$description\",\"public\":false,\"f
 OUTPUT=$WORKSPACE/cluster-config.txt
 ocp4-aws -i dev-svc > $OUTPUT
 echo -n "kubeconfig: " >> $OUTPUT
-echo $GIST | jq '.html_url' | tr -d '"' >> $OUTPUT
+echo $GIST | jq '.files.kubeconfig.raw_url' | tr -d '"' >> $OUTPUT
 echo "openshift-install: $OI_VERSION" >> $OUTPUT
 
 SLACK_MESSAGE="@openshift-dev-services Today's dev cluster:\n\`\`\`\n$(sed -E ':a;N;$!ba;s/\r{0,1}\n/\\n/g' $OUTPUT)\`\`\`\n"
