@@ -24,8 +24,6 @@ wget -O oi.tar.gz https://mirror.openshift.com/pub/openshift-v4/clients/${OCP_RE
 tar -xvf oi.tar.gz
 rm -rvf oi.tar.gz
 
-git clone https://github.com/pmacik/ocp-utils ocp-utils.git
-
 export PATH=$PATH:$WORKSPACE:$WORKSPACE/ocp-utils.git/ocp4-aws
 
 oc version
