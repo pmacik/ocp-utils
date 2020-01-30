@@ -5,6 +5,8 @@ set -eo pipefail
 ## Parameters
 # OI_VERSION="4.4.0-0.nightly-2020-01-22-045318"
 # OCP4_AWS_CLUSTER_NAME_SUFFIX=""
+# OCP_RELEASE_DIR="ocp-dev-preview"
+# OCP_RELEASE="4.4"
 ## Secrets
 # DEV_SVC_INSTALL_CONFIG="/tmp/dev-svc-install-config.yaml"
 # AWS_ACCESS_KEY_ID="..."
@@ -14,11 +16,11 @@ set -eo pipefail
 
 cd $WORKSPACE
 
-wget -O oc.tar.gz https://mirror.openshift.com/pub/openshift-v4/clients/ocp-dev-preview/${OI_VERSION}/openshift-client-linux-${OI_VERSION}.tar.gz
+wget -O oc.tar.gz https://mirror.openshift.com/pub/openshift-v4/clients/${OCP_RELEASE_DIR}/${OI_VERSION}/openshift-client-linux-${OI_VERSION}.tar.gz
 tar -xvf oc.tar.gz
 rm -rvf oc.tar.gz
 
-wget -O oi.tar.gz https://mirror.openshift.com/pub/openshift-v4/clients/ocp-dev-preview/${OI_VERSION}/openshift-install-linux-${OI_VERSION}.tar.gz
+wget -O oi.tar.gz https://mirror.openshift.com/pub/openshift-v4/clients/${OCP_RELEASE_DIR}/${OI_VERSION}/openshift-install-linux-${OI_VERSION}.tar.gz
 tar -xvf oi.tar.gz
 rm -rvf oi.tar.gz
 
@@ -35,7 +37,7 @@ mkdir -p $OCP4_AWS_WORKSPACE/vault
 
 cp $DEV_SVC_INSTALL_CONFIG $OCP4_AWS_WORKSPACE/vault/dev-svc-install-config.yaml
 
-export OCP4_AWS_CLUSTER_NAME_SUFFIX=${OCP4_AWS_CLUSTER_NAME_SUFFIX:-$(date +%Y%m%d)}
+export OCP4_AWS_CLUSTER_NAME_SUFFIX=${OCP4_AWS_CLUSTER_NAME_SUFFIX:-${OCP_RELEASE}-$(date +%Y%m%d)}
 
 ocp4-aws -n dev-svc
 ocp4-aws -u dev-svc
@@ -53,8 +55,11 @@ ocp4-aws -i dev-svc > $OUTPUT
 echo -n "kubeconfig: " >> $OUTPUT
 echo $GIST | jq '.files.kubeconfig.raw_url' | tr -d '"' >> $OUTPUT
 echo "openshift-install: $OI_VERSION" >> $OUTPUT
-cat $OUTPUT
 
 SLACK_MESSAGE="@openshift-dev-services Today's dev cluster:\n\`\`\`\n$(sed -E ':a;N;$!ba;s/\r{0,1}\n/\\n/g' $OUTPUT)\`\`\`\n"
+
+echo "------"
+echo $SLACK_MESSAGE
+echo "------"
 
 curl -XPOST -H "Content-Type: application/json" -H "Authorization: Bearer $SLACK_API_TOKEN" -d "{\"channel\":\"#forum-os-dev-services\",\"link_names\":\"true\",\"text\":\"$SLACK_MESSAGE\"}" 'https://coreos.slack.com/api/chat.postMessage'
