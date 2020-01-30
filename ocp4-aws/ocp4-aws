@@ -162,6 +162,7 @@ use_cluster() {
             ln -s $CLUSTER_DIR $OCP4_AWS_WORKSPACE/current
         else
             echo "ERROR: Cluster directory $CLUSTER_NAME not found ($CLUSTER_DIR)."
+            exit 1
         fi
     else
         _use_cluster_usage
@@ -194,6 +195,7 @@ clean_local_files() {
             rm -rvf $CLUSTER_DIR
         else
             echo "ERROR: Cluster directory $CLUSTER_NAME not found ($CLUSTER_DIR)."
+            exit 1
         fi
     else
         _clean_local_files_usage
@@ -238,6 +240,7 @@ cluster_info() {
             #echo ""
         else
             echo "ERROR: Cluster directory $CLUSTER_NAME not found ($CLUSTER_DIR)."
+            exit 1
         fi
     else
         _cluster_info_usage
