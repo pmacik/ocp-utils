@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -eo pipefail
+
 ## Parameters
 # OI_VERSION="4.4.0-0.nightly-2020-01-22-045318"
 # OCP4_AWS_CLUSTER_NAME_SUFFIX=""
@@ -15,7 +17,7 @@ cd $WORKSPACE
 wget -O oc.tar.gz https://mirror.openshift.com/pub/openshift-v4/clients/ocp-dev-preview/${OI_VERSION}/openshift-client-linux-${OI_VERSION}.tar.gz
 tar -xvf oc.tar.gz
 rm -rvf oc.tar.gz
-    
+
 wget -O oi.tar.gz https://mirror.openshift.com/pub/openshift-v4/clients/ocp-dev-preview/${OI_VERSION}/openshift-install-linux-${OI_VERSION}.tar.gz
 tar -xvf oi.tar.gz
 rm -rvf oi.tar.gz
@@ -51,6 +53,7 @@ ocp4-aws -i dev-svc > $OUTPUT
 echo -n "kubeconfig: " >> $OUTPUT
 echo $GIST | jq '.files.kubeconfig.raw_url' | tr -d '"' >> $OUTPUT
 echo "openshift-install: $OI_VERSION" >> $OUTPUT
+cat $OUTPUT
 
 SLACK_MESSAGE="@openshift-dev-services Today's dev cluster:\n\`\`\`\n$(sed -E ':a;N;$!ba;s/\r{0,1}\n/\\n/g' $OUTPUT)\`\`\`\n"
 
