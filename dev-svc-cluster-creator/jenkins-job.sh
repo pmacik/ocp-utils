@@ -7,6 +7,7 @@ set -eo pipefail
 # OCP4_AWS_CLUSTER_NAME_SUFFIX=""
 # OCP_RELEASE_DIR="ocp-dev-preview"
 # OCP_RELEASE="4.4"
+# POST_CLUSTER_INFO_ON_SLACK="true"
 ## Secrets
 # DEV_SVC_INSTALL_CONFIG="/tmp/dev-svc-install-config.yaml"
 # AWS_ACCESS_KEY_ID="..."
@@ -60,4 +61,6 @@ echo "------"
 echo $SLACK_MESSAGE
 echo "------"
 
-curl -XPOST -H "Content-Type: application/json" -H "Authorization: Bearer $SLACK_API_TOKEN" -d "{\"channel\":\"#forum-os-dev-services\",\"link_names\":\"true\",\"text\":\"$SLACK_MESSAGE\"}" 'https://coreos.slack.com/api/chat.postMessage'
+if [ "$POST_CLUSTER_INFO_ON_SLACK" == "true" ]; then
+    curl -XPOST -H "Content-Type: application/json" -H "Authorization: Bearer $SLACK_API_TOKEN" -d "{\"channel\":\"#forum-os-dev-services\",\"link_names\":\"true\",\"text\":\"$SLACK_MESSAGE\"}" 'https://coreos.slack.com/api/chat.postMessage'
+fi
