@@ -3,21 +3,23 @@
 N_ARG="--new-cluster"
 U_ARG="--use-cluster"
 D_ARG="--destroy-cluster"
+DD_ARG="--destroy-cluster-by-infraid"
 C_ARG="--clean-local-files"
 I_ARG="--cluster-info"
 
 CLI="ocp4-aws"
 
 usage() {
-    echo "Usage: $CLI ( -n | -u | -d | -c ) <cluster-name>"
+    echo "Usage: $CLI ( -n | -u | -d | -D | -c | -i ) <name>"
     echo ""
-    echo "  -n  $N_ARG    Create a new OCP4 cluster named <cluster-name>"
-    echo "  -u  $U_ARG    Switch to the OCP4 cluster named <cluster-name>"
-    echo "  -d  $D_ARG    Destroy the OCP4 cluster named <cluster-name>"
-    echo "  -c  $C_ARG    Delete local cluster directory (\$OCP_AWS_WORKSPACE/cluster/<cluster-name>)"
-    echo "  -i  $I_ARG    Print cluster info from the local cluster directory (\$OCP_AWS_WORKSPACE/cluster/<cluster-name>)"
+    echo "  -n  $N_ARG    Create a new OCP4 cluster named <name>"
+    echo "  -u  $U_ARG    Switch to the OCP4 cluster named <name>"
+    echo "  -d  $D_ARG    Destroy the OCP4 cluster named <name>"
+    echo "  -D  $DD_ARG   Destroy the OCP4 cluster by infraID=<name>"
+    echo "  -c  $C_ARG    Delete local cluster directory (\$OCP_AWS_WORKSPACE/cluster/<name>)"
+    echo "  -i  $I_ARG    Print cluster info from the local cluster directory (\$OCP_AWS_WORKSPACE/cluster/<name>)"
     echo ""
-    echo "Note: When OCP4_AWS_CLUSTER_NAME_SUFFIX environment variable is set the cluster name used would be <cluster-name>-<suffix>."
+    echo "Note: When OCP4_AWS_CLUSTER_NAME_SUFFIX environment variable is set the cluster name used would be <name>-<suffix>."
 }
 
 set_env() {
@@ -56,25 +58,25 @@ set_env() {
 
 _new_cluster_usage() {
     echo ""
-    echo "Usage: $CLI [ -n | $N_ARG ] <cluster-name>"
+    echo "Usage: $CLI [ -n | $N_ARG ] <name>"
     echo ""
-    echo "  Create a new cluster of a given name (<cluster-name>)."
+    echo "  Create a new cluster of a given name (<name>)."
     echo ""
     echo "  Looks for '\$OCP4_AWS_WORKSPACE/vault/<clustername>-install-config.yaml' file."
     echo ""
-    echo "  If the file exists, a new cluster directory '\$OCP4_AWS_WORKSPACE/cluster/<cluster-name>'"
+    echo "  If the file exists, a new cluster directory '\$OCP4_AWS_WORKSPACE/cluster/<name>'"
     echo "  is created and the above install config file is copied"
-    echo "  to '\$OCP4_AWS_WORKSPACE/cluster/<cluster-name>/install-config.yaml' so that"
+    echo "  to '\$OCP4_AWS_WORKSPACE/cluster/<name>/install-config.yaml' so that"
     echo "  the 'openshift-install' tool can pick it up and use it to create the new cluster."
     echo ""
     echo "  If the file does not exist, the script triggers an ordinary cluster-creating wizard"
     echo "  of the 'openshift-install' tool specifying the cluster directory by '--dir' parameter"
     echo "  by executing the following CLI:"
     echo ""
-    echo "      openshift-install create cluster --log-level debug --dir \$OCP4_AWS_WORKSPACE/cluster/<cluster-name>"
+    echo "      openshift-install create cluster --log-level debug --dir \$OCP4_AWS_WORKSPACE/cluster/<name>"
     echo ""
     echo "Note: When OCP4_AWS_CLUSTER_NAME_SUFFIX environment variable is set the cluster config is first cloned (if necessary)"
-    echo "while the cluster name is modified by adding the suffix to be <cluster-name>-<suffix>."
+    echo "while the cluster name is modified by adding the suffix to be <name>-<suffix>."
 }
 
 new_cluster() {
@@ -106,14 +108,14 @@ new_cluster() {
 
 _destroy_cluster_usage() {
     echo ""
-    echo "Usage: $CLI [ -d | $D_ARG ] <cluster-name>"
+    echo "Usage: $CLI [ -d | $D_ARG ] <name>"
     echo ""
     echo "  Destroy the cluster with a given name."
     echo ""
-    echo "  Looks for the cluster directory \$OCP4_AWS_WORKSPACE/cluster/<cluster-name>'"
+    echo "  Looks for the cluster directory \$OCP4_AWS_WORKSPACE/cluster/<name>'"
     echo "  and if it exists, attempts to destroy the cluster via 'openshift_install' tool."
     echo ""
-    echo "Note: When OCP4_AWS_CLUSTER_NAME_SUFFIX environment variable is set the cluster name used would be <cluster-name>-<suffix>."
+    echo "Note: When OCP4_AWS_CLUSTER_NAME_SUFFIX environment variable is set the cluster name used would be <name>-<suffix>."
 }
 
 destroy_cluster() {
@@ -134,17 +136,40 @@ destroy_cluster() {
     fi
 }
 
+_destroy_cluster_by_infraid_usage() {
+    echo ""
+    echo "Usage: $CLI [ -D | $DD_ARG ] <name>"
+    echo ""
+    echo "  Search for the cluster with a given infraID=<name> and destroy it."
+    echo ""
+}
+
+destroy_cluster_by_infraid() {
+    set_env true $2
+
+    INFRA_ID="${1:-}"
+    TMP_DIR="$(mktemp -d)"
+    METADATA_FILE="$TMP_DIR/metadata.json"
+    echo '{"infraID": "'$INFRA_ID'","aws": {"region": "us-east-2","identifier": [{ "kubernetes.io/cluster/'$INFRA_ID'": "owned" }]}}' > $METADATA_FILE
+
+    set -x
+    ${OI_BINARY} destroy cluster --log-level debug --dir $TMP_DIR
+    set +x
+
+    rm -rf $TMP_DIR
+}
+
 _use_cluster_usage() {
     echo ""
-    echo "Usage: $CLI [ -u | $U_ARG ] <cluster-name>"
+    echo "Usage: $CLI [ -u | $U_ARG ] <name>"
     echo ""
     echo "  Uses the given cluster as the current one."
     echo ""
-    echo "  Looks for the '\$OCP4_AWS_WORKSPACE/cluster/<cluster-name>' directory"
+    echo "  Looks for the '\$OCP4_AWS_WORKSPACE/cluster/<name>' directory"
     echo "  and if it exists a convenient symbolic link '\$OCP4_AWS_WORKSPACE/current'"
-    echo "  is created/updated pointing at '\$OCP4_AWS_WORKSPACE/cluster/<cluster-name>'."
+    echo "  is created/updated pointing at '\$OCP4_AWS_WORKSPACE/cluster/<name>'."
     echo ""
-    echo "Note: When OCP4_AWS_CLUSTER_NAME_SUFFIX environment variable is set the cluster name used would be <cluster-name>-<suffix>."
+    echo "Note: When OCP4_AWS_CLUSTER_NAME_SUFFIX environment variable is set the cluster name used would be <name>-<suffix>."
 }
 
 use_cluster() {
@@ -171,14 +196,14 @@ use_cluster() {
 
 _clean_local_files_usage() {
     echo ""
-    echo "Usage: $CLI [ -c | $C_ARG ] <cluster-name>"
+    echo "Usage: $CLI [ -c | $C_ARG ] <name>"
     echo ""
     echo "  Cleans (deletes) the local directory for the given cluster."
     echo ""
-    echo "  Looks for the '\$OCP4_AWS_WORKSPACE/cluster/<cluster-name>' directory"
+    echo "  Looks for the '\$OCP4_AWS_WORKSPACE/cluster/<name>' directory"
     echo "  and if it exists it's deleted."
     echo ""
-    echo "Note: When OCP4_AWS_CLUSTER_NAME_SUFFIX environment variable is set the cluster name used would be <cluster-name>-<suffix>."
+    echo "Note: When OCP4_AWS_CLUSTER_NAME_SUFFIX environment variable is set the cluster name used would be <name>-<suffix>."
 }
 
 clean_local_files() {
@@ -204,14 +229,14 @@ clean_local_files() {
 
 _cluster_info_usage() {
     echo ""
-    echo "Usage: $CLI [ -i | $I_ARG ] <cluster-name>"
+    echo "Usage: $CLI [ -i | $I_ARG ] <name>"
     echo ""
     echo "  Prints cluster info from the local directory for the given cluster."
     echo ""
-    echo "  Looks for the '\$OCP4_AWS_WORKSPACE/cluster/<cluster-name>' directory"
+    echo "  Looks for the '\$OCP4_AWS_WORKSPACE/cluster/<name>' directory"
     echo "  and if it exists the cluster connection info is extracted and printed."
     echo ""
-    echo "Note: When OCP4_AWS_CLUSTER_NAME_SUFFIX environment variable is set the cluster name used would be <cluster-name>-<suffix>."
+    echo "Note: When OCP4_AWS_CLUSTER_NAME_SUFFIX environment variable is set the cluster name used would be <name>-<suffix>."
 }
 
 _cluster_domain() {
@@ -255,6 +280,8 @@ case $2 in
                                             ;;
                         -d | $D_ARG )       _destroy_cluster_usage
                                             ;;
+                        -D | $DD_ARG )      _destroy_cluster_by_infraid_usage
+                                            ;;
                         -c | $C_ARG )       _clean_local_files_usage
                                             ;;
                         -i | $I_ARG )       _cluster_info_usage
@@ -267,6 +294,8 @@ case $2 in
                         -u | $U_ARG )       use_cluster $2
                                             ;;
                         -d | $D_ARG )       destroy_cluster $2
+                                            ;;
+                        -D | $DD_ARG )      destroy_cluster_by_infraid $2
                                             ;;
                         -c | $C_ARG )       clean_local_files $2
                                             ;;
