@@ -41,6 +41,10 @@ export OCP4_AWS_CLUSTER_NAME_SUFFIX=${OCP4_AWS_CLUSTER_NAME_SUFFIX:-${OCP_RELEAS
 ocp4-aws -n dev-svc
 ocp4-aws -u dev-svc
 
+cd $OCP4_AWS_WORKSPACE/cluster
+tar -czf $WORKSPACE/cluster-dir.tar.gz *
+cd $WORKSPACE
+
 description=$(ocp4-aws -i dev-svc | sed -E ':a;N;$!ba;s/\r{0,1}\n/\\n/g')
 
 export GIST_ADD_API="https://api.github.com/gists"'?'"access_token=$GIST_API_TOKEN"
