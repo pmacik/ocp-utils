@@ -61,7 +61,7 @@ echo "openshift-install: $OI_VERSION" >> $OUTPUT
 
 SLACK_TEAM="${SLACK_TEAM:-@openshift-app-services}"
 
-SLACK_MESSAGE="$SLACK_TEAM, Today's dev cluster:\n\`\`\`\n$(sed -E ':a;N;$!ba;s/\r{0,1}\n/\\n/g' $OUTPUT)\`\`\`\n"
+SLACK_MESSAGE="$SLACK_TEAM, Today's dev cluster:\n\`\`\`\n$(sed -E ':a;N;$!ba;s/\r{0,1}\n/\\n/g' $OUTPUT)\`\`\`\nPlease be aware that this cluster will be purged in a bit less then 10 hours."
 
 echo "------"
 echo $SLACK_MESSAGE
