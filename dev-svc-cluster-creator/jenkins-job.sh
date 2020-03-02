@@ -59,7 +59,9 @@ echo -n "kubeconfig: " >> $OUTPUT
 echo $GIST | jq '.files.kubeconfig.raw_url' | tr -d '"' >> $OUTPUT
 echo "openshift-install: $OI_VERSION" >> $OUTPUT
 
-SLACK_MESSAGE="@openshift-dev-services Today's dev cluster:\n\`\`\`\n$(sed -E ':a;N;$!ba;s/\r{0,1}\n/\\n/g' $OUTPUT)\`\`\`\n"
+SLACK_TEAM="${SLACK_TEAM:-@openshift-app-services}"
+
+SLACK_MESSAGE="$SLACK_TEAM, Today's dev cluster:\n\`\`\`\n$(sed -E ':a;N;$!ba;s/\r{0,1}\n/\\n/g' $OUTPUT)\`\`\`\n"
 
 echo "------"
 echo $SLACK_MESSAGE
