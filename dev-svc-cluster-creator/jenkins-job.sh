@@ -36,7 +36,7 @@ mkdir -p $OCP4_AWS_WORKSPACE/vault
 
 cp $DEV_SVC_INSTALL_CONFIG $OCP4_AWS_WORKSPACE/vault/dev-svc-install-config.yaml
 
-export OCP4_AWS_CLUSTER_NAME_SUFFIX=${OCP4_AWS_CLUSTER_NAME_SUFFIX:-${OCP_RELEASE}-$(date +%m%d)}
+export OCP4_AWS_CLUSTER_NAME_SUFFIX=${OCP4_AWS_CLUSTER_NAME_SUFFIX:-${OCP_RELEASE}-$(date +%m%d%H)}
 
 ocp4-aws -n dev-svc
 ocp4-aws -u dev-svc
