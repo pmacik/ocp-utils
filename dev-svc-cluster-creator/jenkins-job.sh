@@ -15,6 +15,7 @@ set -eo pipefail
 # GIST_API_TOKEN="..."
 # SLACK_API_TOKEN="..."
 
+export TOOL_DIR="$(readlink -f $(dirname $0))"
 
 function print_operator_subscription {
     PACKAGE_NAME=$1
@@ -22,7 +23,7 @@ function print_operator_subscription {
     CHANNEL=$3
 
     CSV_VERSION=$(oc get packagemanifest $PACKAGE_NAME -o jsonpath='{.status.channels[?(@.name == "'$CHANNEL'")].currentCSV}')
-    sed -e 's,REPLACE_CSV_VERSION,'$CSV_VERSION',g' ./subscription.template.yaml \
+    sed -e 's,REPLACE_CSV_VERSION,'$CSV_VERSION',g' $TOOL_DIR/subscription.template.yaml \
     | sed -e 's,REPLACE_CHANNEL,'$CHANNEL',g' \
     | sed -e 's,REPLACE_OPSRC_NAME,'$OPSRC_NAME',g' \
     | sed -e 's,REPLACE_NAME,'$PACKAGE_NAME',g';
@@ -61,7 +62,7 @@ function add_user {
     oc get secret $HTPASSWD_SECRET -n openshift-config &> /dev/null \
     || oc create secret generic ${HTPASSWD_SECRET} --from-file=htpasswd=${HTPASSWD_FILE} -n openshift-config
 
-    sed -e "s,HTPASSWD_SECRET,${HTPASSWD_SECRET},g" ./oauth.template.yaml | oc apply -f -
+    sed -e "s,HTPASSWD_SECRET,${HTPASSWD_SECRET},g" $TOOL_DIR/oauth.template.yaml | oc apply -f -
 
     sleep 10s
     oc create clusterrolebinding ${USERNAME}_role1 --clusterrole=self-provisioner --user=${USERNAME} || echo clusterrolebinding ${USERNAME}_role1 exists
