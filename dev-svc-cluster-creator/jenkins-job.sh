@@ -40,7 +40,7 @@ function install_operator_subscription {
 
 function install_toolchain_operator {
     NAME=codeready-toolchain-operator
-    OPSRC_NAME=codeready-toolchain-operator
+    OPSRC_NAME=community-operators
     CHANNEL=alpha
 
     print_operator_subscription $NAME $OPSRC_NAME $CHANNEL | oc apply --wait  -f -
