@@ -8,6 +8,7 @@ set -eo pipefail
 # OCP_RELEASE_DIR="ocp-dev-preview"
 # OCP_RELEASE="4.4"
 # POST_CLUSTER_INFO_ON_SLACK="true"
+# POST_CLUSTER_INFO_ON_GIST="true"
 ## Secrets
 # DEV_SVC_INSTALL_CONFIG="/tmp/dev-svc-install-config.yaml"
 # AWS_ACCESS_KEY_ID="..."
@@ -104,11 +105,12 @@ cd $WORKSPACE
 
 description=$(ocp4-aws -i dev-svc | sed -E ':a;N;$!ba;s/\r{0,1}\n/\\n/g')
 
-export GIST_ADD_API="https://api.github.com/gists"'?'"access_token=$GIST_API_TOKEN"
-
 export KUBECONFIG="$OCP4_AWS_WORKSPACE/current/auth/kubeconfig"
 
-GIST=$(curl -L -XPOST -d "{\"description\":\"$description\",\"public\":false,\"files\":{\"kubeconfig\":{\"content\":\"$(sed -E ':a;N;$!ba;s/\r{0,1}\n/\\n/g' $KUBECONFIG)\"}}}" $GIST_ADD_API)
+if [ "$POST_CLUSTER_INFO_ON_GIST" == "true"]; then
+    GIST_ADD_API="https://api.github.com/gists"'?'"access_token=$GIST_API_TOKEN"
+    export GIST=$(curl -L -XPOST -d "{\"description\":\"$description\",\"public\":false,\"files\":{\"kubeconfig\":{\"content\":\"$(sed -E ':a;N;$!ba;s/\r{0,1}\n/\\n/g' $KUBECONFIG)\"}}}" $GIST_ADD_API)
+fi
 
 #TODO: check operator_install logs for failures. If a failure occurs, do not print message to slack.
 # log file = $OCP4_AWS_WORKSPACE/current/.openshift_install.log
@@ -118,8 +120,10 @@ GIST=$(curl -L -XPOST -d "{\"description\":\"$description\",\"public\":false,\"f
 
 OUTPUT=$WORKSPACE/cluster-config.txt
 ocp4-aws -i dev-svc > $OUTPUT
-echo -n "kubeconfig: " >> $OUTPUT
-echo $GIST | jq '.files.kubeconfig.raw_url' | tr -d '"' >> $OUTPUT
+if [ "$POST_CLUSTER_INFO_ON_GIST" == "true"]; then
+    echo -n "kubeconfig: " >> $OUTPUT
+    echo $GIST | jq -cr '.files.kubeconfig.raw_url' >> $OUTPUT
+fi
 echo "openshift-install: $OI_VERSION" >> $OUTPUT
 
 SLACK_TEAM="${SLACK_TEAM:-@openshift-app-services}"
