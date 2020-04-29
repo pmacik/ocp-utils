@@ -9,14 +9,16 @@ set -eo pipefail
 # OCP_RELEASE="4.4"
 # POST_CLUSTER_INFO_ON_SLACK="true"
 # POST_CLUSTER_INFO_ON_GIST="true"
+# CLUSTER_BASENAME="dev-svc"
 ## Secrets
-# DEV_SVC_INSTALL_CONFIG="/tmp/dev-svc-install-config.yaml"
+# DEV_SVC_INSTALL_CONFIG="/tmp/$CLUSTER_BASENAME-install-config.yaml"
 # AWS_ACCESS_KEY_ID="..."
 # AWS_SECRET_ACCESS_KEY="..."
 # GIST_API_TOKEN="..."
 # SLACK_API_TOKEN="..."
 
 export TOOL_DIR="$(readlink -f $(dirname $0))"
+export CLUSTER_BASENAME="${CLUSTER_BASENAME:-dev-svc}"
 
 function print_operator_subscription {
     PACKAGE_NAME=$1
@@ -92,18 +94,19 @@ export OCP4_AWS_WORKSPACE=$WORKSPACE/ocp4-aws
 
 mkdir -p $OCP4_AWS_WORKSPACE/vault
 
-cp $DEV_SVC_INSTALL_CONFIG $OCP4_AWS_WORKSPACE/vault/dev-svc-install-config.yaml
+cp $DEV_SVC_INSTALL_CONFIG $OCP4_AWS_WORKSPACE/vault/$CLUSTER_BASENAME-install-config.yaml
 
 export OCP4_AWS_CLUSTER_NAME_SUFFIX=${OCP4_AWS_CLUSTER_NAME_SUFFIX:-${OCP_RELEASE}-$(date +%m%d%H)}
 
-ocp4-aws -n dev-svc
-ocp4-aws -u dev-svc
+ocp4-aws -n $CLUSTER_BASENAME
+ocp4-aws -u $CLUSTER_BASENAME
 
 cd $OCP4_AWS_WORKSPACE/cluster
 tar -czf $WORKSPACE/cluster-dir.tar.gz *
 cd $WORKSPACE
 
-description=$(ocp4-aws -i dev-svc | sed -E ':a;N;$!ba;s/\r{0,1}\n/\\n/g')
+description=$(ocp4-aws -i $CLUSTER_BASENAME | sed -E ':a;N;$!ba;s/\r{0,1}\n/\\n/g')
+
 
 export KUBECONFIG="$OCP4_AWS_WORKSPACE/current/auth/kubeconfig"
 
@@ -119,7 +122,7 @@ fi
 #--output
 
 OUTPUT=$WORKSPACE/cluster-config.txt
-ocp4-aws -i dev-svc > $OUTPUT
+ocp4-aws -i $CLUSTER_BASENAME > $OUTPUT
 if [ "$POST_CLUSTER_INFO_ON_GIST" == "true"]; then
     echo -n "kubeconfig: " >> $OUTPUT
     echo $GIST | jq -cr '.files.kubeconfig.raw_url' >> $OUTPUT
