@@ -110,7 +110,7 @@ description=$(ocp4-aws -i $CLUSTER_BASENAME | sed -E ':a;N;$!ba;s/\r{0,1}\n/\\n/
 
 export KUBECONFIG="$OCP4_AWS_WORKSPACE/current/auth/kubeconfig"
 
-if [ "$POST_CLUSTER_INFO_ON_GIST" == "true"]; then
+if [ "$POST_CLUSTER_INFO_ON_GIST" == "true" ]; then
     GIST_ADD_API="https://api.github.com/gists"'?'"access_token=$GIST_API_TOKEN"
     export GIST=$(curl -L -XPOST -d "{\"description\":\"$description\",\"public\":false,\"files\":{\"kubeconfig\":{\"content\":\"$(sed -E ':a;N;$!ba;s/\r{0,1}\n/\\n/g' $KUBECONFIG)\"}}}" $GIST_ADD_API)
 fi
@@ -123,7 +123,7 @@ fi
 
 OUTPUT=$WORKSPACE/cluster-config.txt
 ocp4-aws -i $CLUSTER_BASENAME > $OUTPUT
-if [ "$POST_CLUSTER_INFO_ON_GIST" == "true"]; then
+if [ "$POST_CLUSTER_INFO_ON_GIST" == "true" ]; then
     echo -n "kubeconfig: " >> $OUTPUT
     echo $GIST | jq -cr '.files.kubeconfig.raw_url' >> $OUTPUT
 fi
