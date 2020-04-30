@@ -9,6 +9,7 @@ set -eo pipefail
 # OCP_RELEASE="4.4"
 # POST_CLUSTER_INFO_ON_SLACK="true"
 # POST_CLUSTER_INFO_ON_GIST="true"
+# INSTALL_TOOLCHAIN_OPERATOR="true"
 # CLUSTER_BASENAME="dev-svc"
 ## Secrets
 # DEV_SVC_INSTALL_CONFIG="/tmp/$CLUSTER_BASENAME-install-config.yaml"
@@ -19,6 +20,7 @@ set -eo pipefail
 
 export TOOL_DIR="$(readlink -f $(dirname $0))"
 export CLUSTER_BASENAME="${CLUSTER_BASENAME:-dev-svc}"
+export INSTALL_TOOLCHAIN_OPERATOR="${INSTALL_TOOLCHAIN_OPERATOR:-true}"
 
 function print_operator_subscription {
     PACKAGE_NAME=$1
@@ -138,9 +140,10 @@ echo $SLACK_MESSAGE
 echo "------"
 
 # install toolchain-operator
-
-add_user
-install_toolchain_operator
+if [ "$INSTALL_TOOLCHAIN_OPERATOR" == "true" ]; then
+    add_user
+    install_toolchain_operator
+fi
 
 if [ "$POST_CLUSTER_INFO_ON_SLACK" == "true" ]; then
     curl -XPOST -H "Content-Type: application/json" -H "Authorization: Bearer $SLACK_API_TOKEN" -d "{\"channel\":\"#forum-os-dev-services\",\"link_names\":\"true\",\"as_user\":\"true\",\"text\":\"$SLACK_MESSAGE\"}" 'https://coreos.slack.com/api/chat.postMessage'
