@@ -21,6 +21,7 @@ set -eo pipefail
 export TOOL_DIR="$(readlink -f $(dirname $0))"
 export CLUSTER_BASENAME="${CLUSTER_BASENAME:-dev-svc}"
 export INSTALL_TOOLCHAIN_OPERATOR="${INSTALL_TOOLCHAIN_OPERATOR:-true}"
+export OI_VERSION=${OI_VERSION:-$(curl -s -L https://mirror.openshift.com/pub/openshift-v4/clients/$OCP_RELEASE_DIR/latest-$OCP_RELEASE/release.txt | grep 'Name:' | sed -e 's,Name:\s\+\(.*\),\1,g')}
 
 function print_operator_subscription {
     PACKAGE_NAME=$1
