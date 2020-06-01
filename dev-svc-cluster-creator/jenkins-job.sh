@@ -21,7 +21,18 @@ set -eo pipefail
 export TOOL_DIR="$(readlink -f $(dirname $0))"
 export CLUSTER_BASENAME="${CLUSTER_BASENAME:-dev-svc}"
 export INSTALL_TOOLCHAIN_OPERATOR="${INSTALL_TOOLCHAIN_OPERATOR:-true}"
-export OI_VERSION=${OI_VERSION:-$(curl -s -L https://mirror.openshift.com/pub/openshift-v4/clients/$OCP_RELEASE_DIR/latest-$OCP_RELEASE/release.txt | grep 'Name:' | sed -e 's,Name:\s\+\(.*\),\1,g')}
+if [ -z $OCP_RELEASE ] && [ -z $OI_VERSION ]; then
+    echo "At least one of OCP_RELEASE or OI_VERSION variables needs to be set."
+    exit 1
+fi
+
+if [ -z $OCP_RELEASE ]; then
+    #detect OCP_RELEASE for given OI_VERSION
+    export OCP_RELEASE=$(echo $OI_VERSION | sed 's,\([0-9]\+\.[0-9]\+\)\..*,\1,g')
+else
+    #detect OI_VERSION for given OCP_RELEASE
+    export OI_VERSION=${OI_VERSION:-$(curl -s -L https://mirror.openshift.com/pub/openshift-v4/clients/$OCP_RELEASE_DIR/latest-$OCP_RELEASE/release.txt | grep 'Name:' | sed -e 's,Name:\s\+\(.*\),\1,g')}
+fi
 
 function print_operator_subscription {
     PACKAGE_NAME=$1
