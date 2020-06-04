@@ -55,8 +55,11 @@
         artifacts: cluster-config.txt, cluster-dir.tar.gz, ocp4-aws/current/auth/kubeconfig
         case-sensitive: true
         default-excludes: true
-        fingerprint: false
+        fingerprint: true
         only-if-success: false
+    - fingerprint:
+        files: kubeconfig
+        record-artifacts: true
     scm:
     - git:
         basedir: ocp-utils.git
