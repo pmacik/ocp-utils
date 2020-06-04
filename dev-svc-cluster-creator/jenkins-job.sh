@@ -143,6 +143,7 @@ if [ "$POST_CLUSTER_INFO_ON_GIST" == "true" ]; then
 fi
 echo "openshift-install: $OI_VERSION" >> $OUTPUT
 
+SLACK_CHANNEL="#forum-app-services"
 SLACK_TEAM="${SLACK_TEAM:-@openshift-app-services}"
 
 SLACK_MESSAGE="$SLACK_TEAM, Today's dev cluster:\n\`\`\`\n$(sed -E ':a;N;$!ba;s/\r{0,1}\n/\\n/g' $OUTPUT)\`\`\`\nPlease be aware that this cluster will be purged in a bit less then 10 hours."
@@ -158,5 +159,5 @@ if [ "$INSTALL_TOOLCHAIN_OPERATOR" == "true" ]; then
 fi
 
 if [ "$POST_CLUSTER_INFO_ON_SLACK" == "true" ]; then
-    curl -XPOST -H "Content-Type: application/json" -H "Authorization: Bearer $SLACK_API_TOKEN" -d "{\"channel\":\"#forum-os-dev-services\",\"link_names\":\"true\",\"as_user\":\"true\",\"text\":\"$SLACK_MESSAGE\"}" 'https://coreos.slack.com/api/chat.postMessage'
+    curl -XPOST -H "Content-Type: application/json" -H "Authorization: Bearer $SLACK_API_TOKEN" -d "{\"channel\":\"$SLACK_CHANNEL\",\"link_names\":\"true\",\"as_user\":\"true\",\"text\":\"$SLACK_MESSAGE\"}" 'https://coreos.slack.com/api/chat.postMessage'
 fi
