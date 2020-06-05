@@ -11,9 +11,9 @@
         ./ocp-utils.git/dev-svc-cluster-creator/jenkins-job.sh
 
         mv $WORKSPACE/ocp4-aws/current/auth/kubeconfig $WORKSPACE/kubeconfig
-    concurrent: false
+    concurrent: true
     disabled: false
-    name: helm-acc-tests-os-cluster-4.4
+    name: helm-acc-tests-os-cluster
     parameters:
     - string:
         default: 4.4.0
