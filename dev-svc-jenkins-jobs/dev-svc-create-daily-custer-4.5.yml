@@ -67,7 +67,7 @@
         - '*/master'
         url: https://github.com/pmacik/ocp-utils
     triggers:
-    - timed: H 4,13 * * 1-5
+    - timed: H 1,7,14 * * 1-5
     wrappers:
     - workspace-cleanup:
         dirmatch: false
