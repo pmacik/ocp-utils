@@ -44,6 +44,10 @@
         default: false
         description: ''
         name: INSTALL_TOOLCHAIN_OPERATOR
+    - bool:
+        default: false
+        description: ''
+        name: INSTALL_PIPELINES_OPERATOR
     project-type: freestyle
     properties:
     - build-discarder:

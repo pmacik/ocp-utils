@@ -10,6 +10,7 @@ set -eo pipefail
 # POST_CLUSTER_INFO_ON_SLACK="true"
 # POST_CLUSTER_INFO_ON_GIST="true"
 # INSTALL_TOOLCHAIN_OPERATOR="true"
+# INSTALL_PIPELINES_OPERATOR="true"
 # CLUSTER_BASENAME="dev-svc"
 ## Secrets
 # DEV_SVC_INSTALL_CONFIG="/tmp/$CLUSTER_BASENAME-install-config.yaml"
@@ -20,7 +21,8 @@ set -eo pipefail
 
 export TOOL_DIR="$(readlink -f $(dirname $0))"
 export CLUSTER_BASENAME="${CLUSTER_BASENAME:-dev-svc}"
-export INSTALL_TOOLCHAIN_OPERATOR="${INSTALL_TOOLCHAIN_OPERATOR:-true}"
+export INSTALL_TOOLCHAIN_OPERATOR="${INSTALL_TOOLCHAIN_OPERATOR:-false}"
+export INSTALL_PIPELINES_OPERATOR="${INSTALL_PIPELINES_OPERATOR:-false}"
 if [ -z $OCP_RELEASE ] && [ -z $OI_VERSION ]; then
     echo "At least one of OCP_RELEASE or OI_VERSION variables needs to be set."
     exit 1
@@ -53,6 +55,14 @@ function install_operator_subscription {
         echo "ERROR: packagemanifest $1 not found";
         exit 1;
     fi
+}
+
+function install_pipelines_operator {
+    NAME=openshift-pipelines-operator-rh
+    OPSRC_NAME=redhat-operators
+    CHANNEL=ocp-4.4
+
+    print_operator_subscription $NAME $OPSRC_NAME $CHANNEL | oc apply --wait  -f -
 }
 
 function install_toolchain_operator {
@@ -152,11 +162,19 @@ echo "------"
 echo $SLACK_MESSAGE
 echo "------"
 
+# add non-admin user
+add_user
+
 # install toolchain-operator
 if [ "$INSTALL_TOOLCHAIN_OPERATOR" == "true" ]; then
-    add_user
     install_toolchain_operator
 fi
+
+# install pipelines-operator
+if [ "$INSTALL_PIPELINES_OPERATOR" == "true" ]; then
+    install_pipelines_operator
+fi
+
 
 if [ "$POST_CLUSTER_INFO_ON_SLACK" == "true" ]; then
     curl -XPOST -H "Content-Type: application/json" -H "Authorization: Bearer $SLACK_API_TOKEN" -d "{\"channel\":\"$SLACK_CHANNEL\",\"link_names\":\"true\",\"as_user\":\"true\",\"text\":\"$SLACK_MESSAGE\"}" 'https://coreos.slack.com/api/chat.postMessage'
