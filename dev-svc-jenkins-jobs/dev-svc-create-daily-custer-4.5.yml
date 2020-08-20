@@ -40,6 +40,10 @@
         default: true
         description: ''
         name: POST_CLUSTER_INFO_ON_GIST
+    - bool:
+        default: false
+        description: ''
+        name: INSTALL_TOOLCHAIN_OPERATOR
     project-type: freestyle
     properties:
     - copyartifact:
