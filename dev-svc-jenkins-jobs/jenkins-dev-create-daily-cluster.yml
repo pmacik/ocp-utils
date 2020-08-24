@@ -23,7 +23,7 @@
         name: OCP4_AWS_CLUSTER_NAME_SUFFIX
         trim: 'false'
     - string:
-        default: '4.5'
+        default: '4.6'
         description: ''
         name: OCP_RELEASE
         trim: 'false'
