@@ -1,5 +1,7 @@
 #!/bin/bash
 
+export AWS_DEFAULT_OUTPUT=text
+
 N_ARG="--new-cluster"
 U_ARG="--use-cluster"
 D_ARG="--destroy-cluster"
@@ -170,6 +172,7 @@ _list_clusters_by_infraid_usage() {
 }
 
 list_clusters_by_infraid() {
+
     INFRA_ID="${1:-}"
     TAGS=$(for i in $(aws iam list-roles | grep $INFRA_ID); do if [[ $i == $INFRA_ID* ]]; then aws iam list-role-tags --role-name $i | grep kubernetes | sed -e 's,TAGS.*kubernetes.io/cluster/\([^ ]\+\).*owned,\1,g'; fi; done);
     echo "$(for i in $TAGS; do echo $i; done)" | uniq
