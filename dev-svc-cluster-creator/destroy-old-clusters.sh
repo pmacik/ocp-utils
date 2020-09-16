@@ -1,6 +1,7 @@
 #!/bin/bash -x
 
 CLUSTER_BASE_NAME=${CLUSTER_BASE_NAME:-dev-svc}
+DELETE_ALL=${DELETE_ALL:-false}
 # OI_VERSION="4.4.0-0.nightly-2020-01-22-045318"
 # OCP_RELEASE_DIR="ocp-dev-preview"
 # OCP_RELEASE="4.4"
@@ -27,13 +28,19 @@ export OCP4_AWS_WORKSPACE=$WORKSPACE/ocp4-aws
 
 ocp4-aws -l $CLUSTER_BASE_NAME >> vpc.list
 
-
-for DAY in $(seq 1 7); do
-    VPC_PREFIX=$CLUSTER_BASE_NAME-${OCP_RELEASE//\./\-}-$(date -d "$DAY day ago" +%m%d);
+if [[ $DELETE_ALL == "true" ]]; then
     for VPC in $(cat vpc.list); do
-        if [[ $VPC == $VPC_PREFIX* ]]; then
-            echo "Deleting $VPC VPC..."
-            ocp4-aws -D $VPC
-        fi
+        echo "Deleting $VPC VPC..."
+        ocp4-aws -D $VPC
     done
-done
+else
+    for DAY in $(seq 1 7); do
+        VPC_PREFIX=$CLUSTER_BASE_NAME-${OCP_RELEASE//\./\-}-$(date -d "$DAY day ago" +%m%d);
+        for VPC in $(cat vpc.list); do
+            if [[ $VPC == $VPC_PREFIX* ]]; then
+                echo "Deleting $VPC VPC..."
+                ocp4-aws -D $VPC
+            fi
+        done
+    done
+fi
