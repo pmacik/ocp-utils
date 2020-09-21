@@ -101,11 +101,13 @@ function add_user {
 
 cd $WORKSPACE
 
-wget -O oc.tar.gz https://mirror.openshift.com/pub/openshift-v4/clients/${OCP_RELEASE_DIR}/${OI_VERSION}/openshift-client-linux-${OI_VERSION}.tar.gz
+export OC_URL=${OC_URL:-https://mirror.openshift.com/pub/openshift-v4/clients/${OCP_RELEASE_DIR}/${OI_VERSION}/openshift-client-linux-${OI_VERSION}.tar.gz}
+wget -O oc.tar.gz "$OC_URL"
 tar -xvf oc.tar.gz
 rm -rvf oc.tar.gz
 
-wget -O oi.tar.gz https://mirror.openshift.com/pub/openshift-v4/clients/${OCP_RELEASE_DIR}/${OI_VERSION}/openshift-install-linux-${OI_VERSION}.tar.gz
+export OI_URL=${OI_URL:-https://mirror.openshift.com/pub/openshift-v4/clients/${OCP_RELEASE_DIR}/${OI_VERSION}/openshift-install-linux-${OI_VERSION}.tar.gz}
+wget -O oi.tar.gz "$OI_URL"
 tar -xvf oi.tar.gz
 rm -rvf oi.tar.gz
 
