@@ -20,10 +20,10 @@ usage() {
     echo "  -d  $D_ARG    Destroy the OCP4 cluster named <name>"
     echo "  -D  $DD_ARG   Destroy the OCP4 cluster by infraID=<name>"
     echo "  -c  $C_ARG    Delete local cluster directory (\$OCP_AWS_WORKSPACE/cluster/<name>)"
-    echo "  -i  $I_ARG    Print cluster info from the local cluster directory (\$OCP_AWS_WORKSPACE/cluster/<name>)"
-    echo "  -l  $L_ARG    Search for VPCs on AWS and list the cluster names that starts with the <name>. "
+    echo "  -i  $I_ARG    Print cluster info from the local cluster directory (\$OCP_AWS_WORKSPACE/cluster/<name>) or (\$OCP_AWS_WORKSPACE/current if <name> is not provided)"
+    echo "  -l  $L_ARG    Search for VPCs on AWS and list the cluster names that starts with the <name>"
     echo ""
-    echo "Note: When OCP4_AWS_CLUSTER_NAME_SUFFIX environment variable is set the cluster name used would be <name>-<suffix>."
+    echo "Note: When OCP4_AWS_CLUSTER_NAME_SUFFIX environment variable is set the cluster name used would be <name>-<suffix>"
 }
 
 set_env() {
@@ -248,12 +248,14 @@ clean_local_files() {
 
 _cluster_info_usage() {
     echo ""
-    echo "Usage: $CLI [ -i | $I_ARG ] <name>"
+    echo "Usage: $CLI [ -i | $I_ARG ] (<name>)"
     echo ""
     echo "  Prints cluster info from the local directory for the given cluster."
     echo ""
     echo "  Looks for the '\$OCP4_AWS_WORKSPACE/cluster/<name>' directory"
     echo "  and if it exists the cluster connection info is extracted and printed."
+    echo ""
+    echo "  If <name> is not provided, it looks for the current cluster directory '\$OCP4_AWS_WORKSPACE/current'"
     echo ""
     echo "Note: When OCP4_AWS_CLUSTER_NAME_SUFFIX environment variable is set the cluster name used would be <name>-<suffix>."
 }
@@ -275,19 +277,20 @@ cluster_info() {
     fi
     if [ "$CLUSTER_NAME" != "" ]; then
         CLUSTER_DIR="$OCP4_AWS_WORKSPACE/cluster/$CLUSTER_NAME"
-        if [ -d $CLUSTER_DIR ]; then
-            echo "console: https://console-openshift-console.apps.$(_cluster_domain $CLUSTER_DIR)"
-            echo "kubeadmin: $(_kubeadmin_pass $CLUSTER_DIR)"
-            #echo "kubeconfig:"
-            #echo ""
-            #echo "$(cat $CLUSTER_DIR/auth/kubeconfig)"
-            #echo ""
-        else
-            echo "ERROR: Cluster directory $CLUSTER_NAME not found ($CLUSTER_DIR)."
-            exit 1
-        fi
     else
+        CLUSTER_DIR="$OCP4_AWS_WORKSPACE/current"
+    fi
+    if [ -d $CLUSTER_DIR ]; then
+        echo "console: https://console-openshift-console.apps.$(_cluster_domain $CLUSTER_DIR)"
+        echo "kubeadmin: $(_kubeadmin_pass $CLUSTER_DIR)"
+        #echo "kubeconfig:"
+        #echo ""
+        #echo "$(cat $CLUSTER_DIR/auth/kubeconfig)"
+        #echo ""
+    else
+        echo "ERROR: Cluster directory not found ($CLUSTER_DIR)."
         _cluster_info_usage
+        exit 1
     fi
 }
 
