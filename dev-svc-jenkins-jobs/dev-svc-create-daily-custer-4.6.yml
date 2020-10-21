@@ -14,7 +14,7 @@
     parameters:
     - string:
         default: ''
-        description: If empty, the version is determined from https://mirror.openshift.com/pub/openshift-v4/clients/$OCP_RELEASE_DIR/latest-$OCP_RELEASE/release.txt
+        description: If empty, the version is determined from https://mirror.openshift.com/pub/openshift-v4/clients/$OCP_RELEASE_DIR/$OCP_RELEASE_TYPE-$OCP_RELEASE/release.txt
         name: OI_VERSION
         trim: 'false'
     - string:
@@ -28,10 +28,18 @@
         name: OCP_RELEASE
         trim: 'false'
     - string:
-        default: ocp-dev-preview
+        default: ocp
         description: ''
         name: OCP_RELEASE_DIR
         trim: 'false'
+    - choice:
+        description: ''
+        name: OCP_RELEASE_TYPE
+        choices:
+            - candidate
+            - latest
+            - stable
+            - fast
     - bool:
         default: true
         description: ''

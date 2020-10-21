@@ -6,6 +6,7 @@ set -eo pipefail
 # OI_VERSION="4.4.0-0.nightly-2020-01-22-045318"
 # OCP4_AWS_CLUSTER_NAME_SUFFIX=""
 # OCP_RELEASE_DIR="ocp-dev-preview"
+# OCP_RELEASE_TYPE="latest"
 # OCP_RELEASE="4.4"
 # POST_CLUSTER_INFO_ON_SLACK="true"
 # POST_CLUSTER_INFO_ON_GIST="true"
@@ -33,7 +34,8 @@ if [ -z $OCP_RELEASE ]; then
     export OCP_RELEASE=$(echo $OI_VERSION | sed 's,\([0-9]\+\.[0-9]\+\)\..*,\1,g')
 else
     #detect OI_VERSION for given OCP_RELEASE
-    export OI_VERSION=${OI_VERSION:-$(curl -s -L https://mirror.openshift.com/pub/openshift-v4/clients/$OCP_RELEASE_DIR/latest-$OCP_RELEASE/release.txt | grep 'Name:' | sed -e 's,Name:\s\+\(.*\),\1,g')}
+    export OCP_RELEASE_TYPE=${OCP_RELEASE_TYPE:-latest}
+    export OI_VERSION=${OI_VERSION:-$(curl -s -L https://mirror.openshift.com/pub/openshift-v4/clients/$OCP_RELEASE_DIR/$OCP_RELEASE_TYPE-$OCP_RELEASE/release.txt | grep 'Name:' | sed -e 's,Name:\s\+\(.*\),\1,g')}
 fi
 
 function print_operator_subscription {
