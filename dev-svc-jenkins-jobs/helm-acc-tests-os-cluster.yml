@@ -16,7 +16,7 @@
     name: helm-acc-tests-os-cluster
     parameters:
     - string:
-        default: 4.4.0
+        default: 4.6.0
         description: ''
         name: OI_VERSION
         trim: 'false'
