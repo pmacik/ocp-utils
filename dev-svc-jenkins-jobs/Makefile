@@ -1,6 +1,6 @@
 
 JENKINS_JOB_BUILDER_CONFIG=$(HOME)/.config/jjb/jenkins_jobs.ini
-JENKINS_JOB_SERVER=dev-svc-jenkins
+JENKINS_JOB_SERVER=ocpappsvc
 
 .PHONY: test
 test:
