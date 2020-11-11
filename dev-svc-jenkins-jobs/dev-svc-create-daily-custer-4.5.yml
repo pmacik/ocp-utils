@@ -9,7 +9,7 @@
 
         ./ocp-utils.git/dev-svc-cluster-creator/jenkins-job.sh
     concurrent: false
-    disabled: false
+    disabled: true
     name: dev-svc-create-daily-custer-4.5
     parameters:
     - string:
