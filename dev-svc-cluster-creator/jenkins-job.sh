@@ -86,7 +86,7 @@ function add_user {
         echo -e "\n\033[0;32m \xE2\x9C\x94 User consoledeveloper already exists \033[0m\n"
         exit;
     fi
-    htpasswd -cb $HTPASSWD_FILE $USERNAME $USERPASS
+    htpasswd -cb $HTPASSWD_FILE $USERNAME $USERPAS
 
     oc get secret $HTPASSWD_SECRET -n openshift-config &> /dev/null \
     || oc create secret generic ${HTPASSWD_SECRET} --from-file=htpasswd=${HTPASSWD_FILE} -n openshift-config
@@ -160,7 +160,7 @@ echo "openshift-install: $OI_VERSION" >> $OUTPUT
 SLACK_CHANNEL="${SLACK_CHANNEL:-#forum-app-services}"
 #SLACK_TEAM="${SLACK_TEAM:-}"
 
-SLACK_MESSAGE="$SLACK_TEAM Today's dev cluster:\n\`\`\`\n$(sed -E ':a;N;$!ba;s/\r{0,1}\n/\\n/g' $OUTPUT)\`\`\`\nPlease be aware that this cluster will be purged in a bit less then 10 hours."
+SLACK_MESSAGE="$SLACK_TEAM Today's v$OCP_RELEASE dev cluster:\n\`\`\`\n$(sed -E ':a;N;$!ba;s/\r{0,1}\n/\\n/g' $OUTPUT)\`\`\`\nPlease be aware that this cluster will be purged in a bit less then 10 hours."
 
 echo "------"
 echo $SLACK_MESSAGE
