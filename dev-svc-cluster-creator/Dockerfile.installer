@@ -1,7 +1,0 @@
-FROM centos:7
-
-USER root
-RUN yum install -y jq wget httpd-tools
-
-COPY * .
-
