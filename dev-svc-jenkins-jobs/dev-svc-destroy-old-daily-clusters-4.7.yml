@@ -10,7 +10,7 @@
         ./ocp-utils.git/dev-svc-cluster-creator/destroy-old-clusters.sh
     concurrent: false
     disabled: false
-    name: dev-svc-destroy-old-daily-clusters-4.6
+    name: dev-svc-destroy-old-daily-clusters-4.7
     parameters:
     - string:
         default: ''
@@ -18,12 +18,12 @@
         name: OI_VERSION
         trim: 'false'
     - string:
-        default: '4.6'
+        default: '4.7'
         description: ''
         name: OCP_RELEASE
         trim: 'false'
     - string:
-        default: ocp
+        default: ocp-dev-preview
         description: ''
         name: OCP_RELEASE_DIR
         trim: 'false'
