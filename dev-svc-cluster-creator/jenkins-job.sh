@@ -86,7 +86,7 @@ function add_user {
         echo -e "\n\033[0;32m \xE2\x9C\x94 User consoledeveloper already exists \033[0m\n"
         exit;
     fi
-    htpasswd -cb $HTPASSWD_FILE $USERNAME $USERPAS
+    htpasswd -cb $HTPASSWD_FILE $USERNAME $USERPASS
 
     oc get secret $HTPASSWD_SECRET -n openshift-config &> /dev/null \
     || oc create secret generic ${HTPASSWD_SECRET} --from-file=htpasswd=${HTPASSWD_FILE} -n openshift-config
