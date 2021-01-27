@@ -21,6 +21,8 @@ set -eo pipefail
 # SLACK_API_TOKEN="..."
 
 export TOOL_DIR="$(readlink -f $(dirname $0))"
+export OI_BINARY=$WORKSPACE/openshift-install
+export OC_BINARY=$WORKSPACE/oc
 export CLUSTER_BASENAME="${CLUSTER_BASENAME:-dev-svc}"
 export INSTALL_TOOLCHAIN_OPERATOR="${INSTALL_TOOLCHAIN_OPERATOR:-false}"
 export INSTALL_PIPELINES_OPERATOR="${INSTALL_PIPELINES_OPERATOR:-false}"
@@ -43,7 +45,7 @@ function print_operator_subscription {
     OPSRC_NAME=$2
     CHANNEL=$3
 
-    CSV_VERSION=$(oc get packagemanifest $PACKAGE_NAME -o jsonpath='{.status.channels[?(@.name == "'$CHANNEL'")].currentCSV}')
+    CSV_VERSION=$(${OC_BINARY} get packagemanifest $PACKAGE_NAME -o jsonpath='{.status.channels[?(@.name == "'$CHANNEL'")].currentCSV}')
     sed -e 's,REPLACE_CSV_VERSION,'$CSV_VERSION',g' $TOOL_DIR/subscription.template.yaml \
     | sed -e 's,REPLACE_CHANNEL,'$CHANNEL',g' \
     | sed -e 's,REPLACE_OPSRC_NAME,'$OPSRC_NAME',g' \
@@ -51,8 +53,8 @@ function print_operator_subscription {
 }
 
 function install_operator_subscription {
-    if [[ ! -z $(oc get packagemanifest | grep $1) ]]; then
-        print_operator_subscription $1 $2 $3 | oc apply --wait -f -
+    if [[ ! -z $(${OC_BINARY} get packagemanifest | grep $1) ]]; then
+        print_operator_subscription $1 $2 $3 | ${OC_BINARY} apply --wait -f -
     else
         echo "ERROR: packagemanifest $1 not found";
         exit 1;
@@ -64,7 +66,7 @@ function install_pipelines_operator {
     OPSRC_NAME=redhat-operators
     CHANNEL=ocp-4.4
 
-    print_operator_subscription $NAME $OPSRC_NAME $CHANNEL | oc apply --wait  -f -
+    print_operator_subscription $NAME $OPSRC_NAME $CHANNEL | ${OC_BINARY} apply --wait  -f -
 }
 
 function install_toolchain_operator {
@@ -72,7 +74,7 @@ function install_toolchain_operator {
     OPSRC_NAME=community-operators
     CHANNEL=alpha
 
-    print_operator_subscription $NAME $OPSRC_NAME $CHANNEL | oc apply --wait  -f -
+    print_operator_subscription $NAME $OPSRC_NAME $CHANNEL | ${OC_BINARY} apply --wait  -f -
 }
 
 function add_user {
@@ -81,24 +83,24 @@ function add_user {
     USERPASS="developer"
     HTPASSWD_SECRET="htpasswd-$USERNAME-secret"
 
-    OC_USERS_LIST="$(oc get users)"
+    OC_USERS_LIST="$(${OC_BINARY} get users)"
     if echo "${OC_USERS_LIST}" | grep -q "${USERNAME}"; then
         echo -e "\n\033[0;32m \xE2\x9C\x94 User consoledeveloper already exists \033[0m\n"
         exit;
     fi
     htpasswd -cb $HTPASSWD_FILE $USERNAME $USERPASS
 
-    oc get secret $HTPASSWD_SECRET -n openshift-config &> /dev/null \
-    || oc create secret generic ${HTPASSWD_SECRET} --from-file=htpasswd=${HTPASSWD_FILE} -n openshift-config
+    ${OC_BINARY} get secret $HTPASSWD_SECRET -n openshift-config &> /dev/null \
+    || ${OC_BINARY} create secret generic ${HTPASSWD_SECRET} --from-file=htpasswd=${HTPASSWD_FILE} -n openshift-config
 
-    sed -e "s,HTPASSWD_SECRET,${HTPASSWD_SECRET},g" $TOOL_DIR/oauth.template.yaml | oc apply -f -
+    sed -e "s,HTPASSWD_SECRET,${HTPASSWD_SECRET},g" $TOOL_DIR/oauth.template.yaml | ${OC_BINARY} apply -f -
 
     sleep 10s
-    oc create clusterrolebinding ${USERNAME}_role1 --clusterrole=self-provisioner --user=${USERNAME} || echo clusterrolebinding ${USERNAME}_role1 exists
-    oc create clusterrolebinding ${USERNAME}_role2 --clusterrole=view --user=${USERNAME} || echo clusterrolebinding ${USERNAME}_role2 exists
+    ${OC_BINARY} create clusterrolebinding ${USERNAME}_role1 --clusterrole=self-provisioner --user=${USERNAME} || echo clusterrolebinding ${USERNAME}_role1 exists
+    ${OC_BINARY} create clusterrolebinding ${USERNAME}_role2 --clusterrole=view --user=${USERNAME} || echo clusterrolebinding ${USERNAME}_role2 exists
     sleep 15s
     echo -e "\n\e[1;35m User consoledeveloper created with the password developer. Type the below\e[0m \n"
-    echo -e "\n\e[1;32m oc login -u\e[3m \e[1;36mconsoledeveloper\e[0m \e[1;32m-p\e[3m \e[1;36mdeveloper\e[0m \n"
+    echo -e "\n\e[1;32m ${OC_BINARY} login -u\e[3m \e[1;36mconsoledeveloper\e[0m \e[1;32m-p\e[3m \e[1;36mdeveloper\e[0m \n"
 }
 
 cd $WORKSPACE
@@ -115,8 +117,8 @@ rm -rvf oi.tar.gz
 
 export PATH=$PATH:$WORKSPACE:$WORKSPACE/ocp-utils.git/ocp4-aws
 
-oc version
-openshift-install version
+${OC_BINARY} version
+${OI_BINARY} version
 
 export OCP4_AWS_WORKSPACE=$WORKSPACE/ocp4-aws
 
