@@ -28,7 +28,7 @@
         name: OCP_RELEASE
         trim: 'false'
     - string:
-        default: ocp-dev-preview
+        default: ocp
         description: ''
         name: OCP_RELEASE_DIR
         trim: 'false'
@@ -36,8 +36,8 @@
         description: ''
         name: OCP_RELEASE_TYPE
         choices:
-            - latest
             - candidate
+            - latest
             - stable
             - fast
     - bool:

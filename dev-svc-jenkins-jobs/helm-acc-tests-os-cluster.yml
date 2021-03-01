@@ -8,7 +8,7 @@
 
         set -eo pipefail
 
-        export OCP4_AWS_CLUSTER_NAME_SUFFIX=${OCP4_AWS_CLUSTER_NAME_SUFFIX:-${OCP_RELEASE}-$(date +%m%d%H%M)}
+        export OCP4_AWS_CLUSTER_NAME_SUFFIX=${OCP4_AWS_CLUSTER_NAME_SUFFIX:-$(date +%m%d%H%M)}
         
         ./ocp-utils.git/dev-svc-cluster-creator/jenkins-job.sh
 
