@@ -158,6 +158,9 @@ destroy_cluster_by_infraid() {
 
     set -x
     ${OI_BINARY} destroy cluster --log-level debug --dir $TMP_DIR
+    for i in $(aws iam list-instance-profiles --output=json | jq -rc '.InstanceProfiles[] | select(.InstanceProfileName | contains("'$INFRA_ID'")).InstanceProfileName'); do
+        aws iam delete-instance-profile --instance-profile-name $i;
+    done
     set +x
 
     rm -rf $TMP_DIR
