@@ -9,7 +9,7 @@
 
         ./ocp-utils.git/dev-svc-cluster-creator/destroy-old-clusters.sh
     concurrent: false
-    disabled: false
+    disabled: true
     name: dev-svc-destroy-old-daily-clusters-4.5
     parameters:
     - string:
