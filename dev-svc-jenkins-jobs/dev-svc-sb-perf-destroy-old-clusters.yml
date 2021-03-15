@@ -10,7 +10,7 @@
         ./ocp-utils.git/dev-svc-cluster-creator/destroy-old-clusters.sh
     concurrent: false
     disabled: false
-    name: dev-svc-sb-perf-destroy-old-clusters-4.7
+    name: dev-svc-sb-perf-destroy-old-clusters
     parameters:
     - string:
         default: ''
