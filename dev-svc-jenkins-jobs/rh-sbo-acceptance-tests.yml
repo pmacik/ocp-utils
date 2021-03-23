@@ -66,7 +66,7 @@
           branches:
           - master
           url: https://gitlab.cee.redhat.com/pmacik/sbo-testing.git
-      script-path: Jenkinsfile
+      script-path: sbo-acceptance-tests/Jenkinsfile
     project-type: pipeline
     properties:
     - build-discarder:
