@@ -14,7 +14,7 @@
 
         mv $WORKSPACE/ocp4-aws/current/auth/kubeconfig $WORKSPACE/kubeconfig
     concurrent: true
-    disabled: false
+    disabled: true
     name: dev-svc-sb-perf-create-cluster
     parameters:
     - string:
