@@ -13,6 +13,7 @@
         ./ocp-utils.git/dev-svc-cluster-creator/jenkins-job.sh
 
         mv $WORKSPACE/ocp4-aws/current/auth/kubeconfig $WORKSPACE/kubeconfig
+        mv $WORKSPACE/ocp4-aws/current/metadata.json $WORKSPACE/metadata.json
     concurrent: true
     disabled: false
     name: sbo-acc-tests-os-cluster
@@ -62,7 +63,7 @@
     publishers:
     - archive:
         allow-empty: false
-        artifacts: '*.tar.gz, kubeconfig'
+        artifacts: '*.tar.gz, kubeconfig, metadata.json'
         case-sensitive: true
         default-excludes: true
         fingerprint: true
