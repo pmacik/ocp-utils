@@ -145,6 +145,8 @@ _destroy_cluster_by_infraid_usage() {
     echo "Usage: $CLI [ -D | $DD_ARG ] <name>"
     echo ""
     echo "  Search for the cluster with a given infraID=<name> and destroy it."
+    echo "  To search in a specific region use OCP4_AWS_REGION environment variable."
+    echo "  Default region is us-east-2 if the above environment variable is not set."
     echo ""
 }
 
@@ -154,7 +156,7 @@ destroy_cluster_by_infraid() {
     INFRA_ID="${1:-}"
     TMP_DIR="$(mktemp -d)"
     METADATA_FILE="$TMP_DIR/metadata.json"
-    echo '{"infraID": "'$INFRA_ID'","aws": {"region": "us-east-2","identifier": [{ "kubernetes.io/cluster/'$INFRA_ID'": "owned" }]}}' > $METADATA_FILE
+    echo '{"infraID": "'$INFRA_ID'","aws": {"region": "'${OCP4_AWS_REGION:-us-east-2}'","identifier": [{ "kubernetes.io/cluster/'$INFRA_ID'": "owned" }]}}' > $METADATA_FILE
 
     set -x
     ${OI_BINARY} destroy cluster --log-level debug --dir $TMP_DIR
