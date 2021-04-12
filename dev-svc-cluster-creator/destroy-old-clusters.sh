@@ -16,7 +16,8 @@ fi
 
 cd $WORKSPACE
 
-wget -O oi.tar.gz https://mirror.openshift.com/pub/openshift-v4/clients/${OCP_RELEASE_DIR}/${OI_VERSION}/openshift-install-linux-${OI_VERSION}.tar.gz
+export OI_URL=${OI_URL:-https://mirror.openshift.com/pub/openshift-v4/clients/${OCP_RELEASE_DIR}/${OI_VERSION}/openshift-install-linux-${OI_VERSION}.tar.gz}
+wget -O oi.tar.gz "$OI_URL"
 tar -xvf oi.tar.gz
 rm -rvf oi.tar.gz
 
