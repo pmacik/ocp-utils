@@ -39,6 +39,16 @@
         name: OCP_RELEASE_DIR
         trim: 'false'
     - string:
+        default: ''
+        description: ''
+        name: OI_URL
+        trim: 'false'
+    - string:
+        default: ''
+        description: ''
+        name: OC_URL
+        trim: 'false'
+    - string:
         default: sbo-acc-tests
         description: ''
         name: CLUSTER_BASENAME

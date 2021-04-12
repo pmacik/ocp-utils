@@ -20,12 +20,22 @@
         name: OCP_RELEASE_DIR
         trim: 'false'
     - string:
-        default: https://github.com/pmacik/service-binding-operator
+        default: ''
+        description: ''
+        name: OI_URL
+        trim: 'false'
+    - string:
+        default: ''
+        description: ''
+        name: OC_URL
+        trim: 'false'
+    - string:
+        default: https://github.com/redhat-developer/service-binding-operator
         description: ''
         name: SBO_ACCEPTANCE_TESTS_REPO
         trim: 'false'
     - string:
-        default: v0.4.0-LPINTEROP-base
+        default: v0.7.0
         description: ''
         name: SBO_ACCEPTANCE_TESTS_BRANCH
         trim: 'false'

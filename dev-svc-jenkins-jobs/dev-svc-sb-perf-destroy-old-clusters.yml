@@ -8,7 +8,7 @@
         set -eo pipefail
 
         ./ocp-utils.git/dev-svc-cluster-creator/destroy-old-clusters.sh
-    concurrent: false
+    concurrent: true
     disabled: false
     name: dev-svc-sb-perf-destroy-old-clusters
     parameters:
@@ -32,6 +32,13 @@
         description: ''
         name: CLUSTER_BASE_NAME
         trim: 'false'
+    - choice:
+        name: OCP4_AWS_REGION
+        choices:
+            - us-east-2
+            - us-east-1
+            - eu-central-1
+        description: ''
     - bool:
         default: true
         description: ''
