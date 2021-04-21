@@ -2,7 +2,7 @@
 JENKINS_JOB_BUILDER_CONFIG=$(HOME)/.config/jjb/jenkins_jobs.ini
 JENKINS_JOB_SERVER=ocpappsvc
 
-JOBS?="*.yaml"
+JOBS?=*.yml
 
 .PHONY: test
 test:

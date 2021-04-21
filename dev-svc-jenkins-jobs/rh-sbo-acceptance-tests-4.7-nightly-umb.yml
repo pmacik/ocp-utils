@@ -24,7 +24,7 @@
       - git:
           branches:
           - master
-          url: https://gitlab.cee.redhat.com/pmacik/sbo-testing.git
+          url: https://gitlab.cee.redhat.com/ocpappsvc/ocpappsvc-qe.git
       script-path: sbo-acceptance-tests/rh-acceptance-tests-umb.Jenkinsfile
     project-type: pipeline
     triggers:
