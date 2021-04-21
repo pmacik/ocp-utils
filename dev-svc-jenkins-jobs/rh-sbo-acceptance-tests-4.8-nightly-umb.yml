@@ -23,7 +23,7 @@
       scm:
       - git:
           branches:
-          - master
+          - main
           url: https://gitlab.cee.redhat.com/ocpappsvc/ocpappsvc-qe.git
       script-path: sbo-acceptance-tests/rh-acceptance-tests-umb.Jenkinsfile
     project-type: pipeline
