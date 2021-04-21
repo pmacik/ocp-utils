@@ -1,0 +1,74 @@
+- job:
+    block-downstream: false
+    block-upstream: false
+    builders:
+    - shell: |-
+        #!/bin/bash
+
+        set -eo pipefail
+
+        ./ocp-utils.git/dev-svc-cluster-creator/destroy-old-clusters.sh
+    concurrent: false
+    disabled: false
+    name: sbo-acc-tests-destroy-cluster
+    parameters:
+    - string:
+        default: ''
+        description: If empty, the version is determined from https://mirror.openshift.com/pub/openshift-v4/clients/$OCP_RELEASE_DIR/latest-$OCP_RELEASE/release.txt
+        name: OI_VERSION
+        trim: 'false'
+    - string:
+        default: '4.8'
+        description: ''
+        name: OCP_RELEASE
+        trim: 'false'
+    - string:
+        default: ocp-dev-preview
+        description: ''
+        name: OCP_RELEASE_DIR
+        trim: 'false'
+    - string:
+        default: ''
+        description: ''
+        name: OI_URL
+        trim: 'true'
+    - string:
+        default: ''
+        description: ''
+        name: OC_URL
+        trim: 'true'
+    - string:
+        default: 
+        description: 'sbo-acc-tests'
+        name: CLUSTER_BASE_NAME
+        trim: 'false'
+    - bool:
+        default: true
+        description: ''
+        name: DELETE_ALL
+    project-type: freestyle
+    properties:
+    - build-discarder:
+        artifact-days-to-keep: -1
+        artifact-num-to-keep: -1
+        days-to-keep: 7
+        num-to-keep: 14
+    scm:
+    - git:
+        basedir: ocp-utils.git
+        branches:
+        - '*/master'
+        url: https://github.com/pmacik/ocp-utils
+    triggers:
+    - timed: H 0 * * *
+    wrappers:
+    - workspace-cleanup:
+        dirmatch: false
+        disable-deferred-wipeout: false
+    - credentials-binding:
+      - text:
+          credential-id: pmacik-aws_access_key_id
+          variable: AWS_ACCESS_KEY_ID
+      - text:
+          credential-id: pmacik-aws_secret_access_key
+          variable: AWS_SECRET_ACCESS_KEY

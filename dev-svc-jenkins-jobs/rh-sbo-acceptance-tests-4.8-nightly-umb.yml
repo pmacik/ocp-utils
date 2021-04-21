@@ -1,0 +1,36 @@
+- job:
+    concurrent: true
+    disabled: false
+    name: rh-sbo-acceptance-tests-4.8-nightly-umb
+    parameters:
+    - string:
+        default: registry.redhat.io/redhat/redhat-operator-index:v4.8
+        description: ''
+        name: OPERATOR_INDEX_IMAGE
+        trim: 'false'
+    - string:
+        default: rh-service-binding-operator
+        description: ''
+        name: OPERATOR_PACKAGE
+        trim: 'false'
+    - string:
+        default: preview
+        description: ''
+        name: OPERATOR_CHANNEL
+        trim: 'false'
+    pipeline-scm:
+      lightweight-checkout: true
+      scm:
+      - git:
+          branches:
+          - master
+          url: https://gitlab.cee.redhat.com/pmacik/sbo-testing.git
+      script-path: sbo-acceptance-tests/rh-acceptance-tests-umb.Jenkinsfile
+    project-type: pipeline
+    triggers:
+    - jms-messaging:
+        no-squash: false
+        provider-name: "Red Hat UMB"
+        override-topic: "Consumer.rh-jenkins-ci-plugin.eea41ef2-6b4f-473c-b18b-3f856bc261f0.VirtualTopic.qe.ci.>"
+        selector: "CI_NAME = 'build%2Fsend-umb-messages' AND product = 'OpenShift Container Platform' AND release_stream='4.8.0-0.nightly'"
+        variable: "CI_MESSAGE"

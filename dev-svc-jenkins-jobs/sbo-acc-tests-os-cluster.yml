@@ -6,14 +6,16 @@
     - shell: |-
         #!/bin/bash
 
-        set -eo pipefail
-
         export OCP4_AWS_CLUSTER_NAME_SUFFIX=${OCP4_AWS_CLUSTER_NAME_SUFFIX:-$(date +%m%d%H%M)}
 
         ./ocp-utils.git/dev-svc-cluster-creator/jenkins-job.sh
 
+        exit_status=$?
+
         mv $WORKSPACE/ocp4-aws/current/auth/kubeconfig $WORKSPACE/kubeconfig
         mv $WORKSPACE/ocp4-aws/current/metadata.json $WORKSPACE/metadata.json
+
+        exit $exit_status
     concurrent: true
     disabled: false
     name: sbo-acc-tests-os-cluster
@@ -42,12 +44,12 @@
         default: ''
         description: ''
         name: OI_URL
-        trim: 'false'
+        trim: 'true'
     - string:
         default: ''
         description: ''
         name: OC_URL
-        trim: 'false'
+        trim: 'true'
     - string:
         default: sbo-acc-tests
         description: ''
@@ -73,13 +75,13 @@
     publishers:
     - archive:
         allow-empty: false
-        artifacts: '*.tar.gz, kubeconfig, metadata.json'
+        artifacts: '*.tar.gz, **/kubeconfig, **/metadata.json'
         case-sensitive: true
         default-excludes: true
         fingerprint: true
         only-if-success: false
     - fingerprint:
-        files: kubeconfig
+        files: '**/kubeconfig, **/metadata.json'
         record-artifacts: true
     scm:
     - git:
