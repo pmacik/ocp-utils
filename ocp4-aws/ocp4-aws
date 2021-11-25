@@ -269,6 +269,10 @@ _cluster_domain() {
     echo $(jq --raw-output '.cluster_domain' $1/terraform.tfvars.json)
 }
 
+_kubeconfig() {
+    echo $1/auth/kubeconfig
+}
+
 _kubeadmin_pass() {
     echo $(cat $1/auth/kubeadmin-password)
 }
@@ -286,12 +290,11 @@ cluster_info() {
         CLUSTER_DIR="$OCP4_AWS_WORKSPACE/current"
     fi
     if [ -d $CLUSTER_DIR ]; then
+        kubeconfig=$(_kubeconfig $CLUSTER_DIR)
+        kubeadmin_pass=$(_kubeadmin_pass $CLUSTER_DIR)
         echo "console: https://console-openshift-console.apps.$(_cluster_domain $CLUSTER_DIR)"
         echo "kubeadmin: $(_kubeadmin_pass $CLUSTER_DIR)"
-        #echo "kubeconfig:"
-        #echo ""
-        #echo "$(cat $CLUSTER_DIR/auth/kubeconfig)"
-        #echo ""
+        echo "cli: oc login $(yq -rc '.clusters[0].cluster.server' $kubeconfig) -u kubeadmin -p $kubeadmin_pass"
     else
         echo "ERROR: Cluster directory not found ($CLUSTER_DIR)."
         _cluster_info_usage
