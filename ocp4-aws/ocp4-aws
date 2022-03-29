@@ -43,20 +43,6 @@ set_env() {
             echo "ERROR openshift-install not found on PATH or the one set by OI_BINARY environment variable not found."
             exit 1
         fi
-
-        OI_LOCAL_VERSION="$(echo ${OI_VERSION} | grep quay.io | sed -e 's,.*\(sha256:.*\),\1,')"
-        OI_LATEST_VERSION="$(curl -s -L https://mirror.openshift.com/pub/openshift-v4/clients/ocp/latest/release.txt | grep "Digest: " | sed -e 's,.*\(sha256:.*\),\1,')"
-
-        if [ "$OI_LOCAL_VERSION" != "$OI_LATEST_VERSION" ]; then
-            echo ""
-            echo "  WARNING: Your local version of openshift-install tool is different from the latest one."
-            echo "           Please update your local version to make sure the OCP4 cluster creating/destroying works properly."
-            echo "           The latest version can be found here: https://mirror.openshift.com/pub/openshift-v4/clients/ocp/latest/"
-            echo ""
-            echo "           Resuming after 15s..."
-            echo ""
-            sleep 15s
-        fi
     fi
 }
 
