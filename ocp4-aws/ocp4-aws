@@ -278,9 +278,12 @@ cluster_info() {
     if [ -d $CLUSTER_DIR ]; then
         kubeconfig=$(_kubeconfig $CLUSTER_DIR)
         kubeadmin_pass=$(_kubeadmin_pass $CLUSTER_DIR)
-        echo "console: https://console-openshift-console.apps.$(_cluster_domain $CLUSTER_DIR)"
+        cluster_domain=$(_cluster_domain $CLUSTER_DIR)
+        cluster_api=$(yq e '.clusters[0].cluster.server' $kubeconfig)
+        echo "console: https://console-openshift-console.apps.$cluster_domain"
         echo "kubeadmin: $(_kubeadmin_pass $CLUSTER_DIR)"
-        echo "cli: oc login $(yq e '.clusters[0].cluster.server' $kubeconfig) -u kubeadmin -p $kubeadmin_pass"
+        echo "api: $cluster_api"
+        echo "cli: oc login $cluster_api -u kubeadmin -p $kubeadmin_pass"
     else
         echo "ERROR: Cluster directory not found ($CLUSTER_DIR)."
         _cluster_info_usage
